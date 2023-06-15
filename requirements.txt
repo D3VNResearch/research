@@ -1,0 +1,10 @@
+pandas
+numpy
+pyodbc
+tqdm
+sqlalchemy
+requests
+unidecode
+chardet
+
+# pip install Office365-REST-Python-Client
