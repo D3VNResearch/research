@@ -1,4 +1,7 @@
-{"database": "D3VNResearch_Staging", 
+{
+ "servername": "hkazdevsqld3vnreserch.database.windows.net",   
+ "database": "D3VNResearch_Staging", 
  "username": "D3VNResearch@savills.com.vn", 
  "password": "@Advisory052023!", 
- "driver_str": "ODBC Driver 17 for SQL Server"}
+ "driver_str": "ODBC Driver 17 for SQL Server"
+}

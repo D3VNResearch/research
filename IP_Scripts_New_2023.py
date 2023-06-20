@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from termcolor import colored
+from validate import *
+
+
 
 class IPData:
     def __init__(self, urls, columns_that_need_unidecode, cnt_str):
