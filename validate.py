@@ -40,11 +40,12 @@ def get_data(relative_url, file_url):
 
     sp_object = relative_url.split('/')[2].replace('-','')
     data = eval(sp_object).get_file(file_url)   
+    print(data)
     #Remove irrelevant data
     #data.dropna(axis = 0, how = 'all', thresh = None, subset = None, inplace = True)#remove blank rows
-    data.dropna(axis = 0, how = 'all', inplace = True)#remove blank rows
-    data.drop(data.columns[data.columns.str.contains('Unnamed')], axis = 1, inplace = True)#remove blank columns
-    data.columns = data.columns.str.strip().str.replace(r'\s+', '', regex = True)#strip column
+    # data.dropna(axis = 0, how = 'all', inplace = True)#remove blank rows
+    # data.drop(data.columns[data.columns.str.contains('Unnamed')], axis = 1, inplace = True)#remove blank columns
+    # data.columns = data.columns.str.strip().str.replace(r'\s+', '', regex = True)#strip column
     file_name = file_url.split('/')[-1].split('.')[0]
     sector = file_url.split('/')[-1].split('_')[0].upper()
     if sector == 'PM':

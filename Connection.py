@@ -18,6 +18,7 @@ def ConnectAzureSQLServer():
         print("CONNECTION SUCESSFUL!")
     except Exception as e:
         print("CONNECTION FAILED:",str(e))
+    return cnt_str, engine
 # Connect SharePoint Get FlatFile
 #url_hub= input(str) Khi xay dung he thong co nhieu hub thi thay doi kieu input
 def ConnectSharePoint(url_hub):
