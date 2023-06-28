@@ -1,0 +1,9 @@
+pandas
+numpy
+pyodbc
+tqdm
+sqlalchemy
+requests
+unidecode
+chardet
+termcolor

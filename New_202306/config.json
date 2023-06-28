@@ -1,0 +1,35 @@
+
+
+{
+    "share_point_VNBIHNS": 
+        {
+            "client_id": "a4601f8a-eec0-4e1a-8ee1-16783caa76f1",
+            "client_secret": "MxzHhpHhn9Pb7d82rT5B0pS9g7ci6+mlMUDjkTZGdKU=",
+            "url": "https://savills.sharepoint.com/sites/VN-BI-HNRS",
+            "site": "/sites/VN-BI-HNRS/"
+        },
+    "share_point_BIHub": 
+        {
+            "client_id": "9e134518-8744-49cf-860e-212e3dfb685f",
+            "client_secret": "yc2GArr6DXuOOKXchx1LtxCFW3Xq1DV0JqTVXzXNT0I=",
+            "url": "https://savills.sharepoint.com/sites/BIHub",
+            "site": "/sites/VN-BI-HNRS/Shared Documents/Test"
+        },
+
+    "share_point_VNBIHCM": 
+        {
+            "client_id": "84ac039a-1c1a-4571-93d2-739a94ce0863",
+            "client_secret": "C/shQsdkp2p9GVFtFwPggoP23AJG7BFU4aVRBszYlG8=",
+            "url": "https://savills.sharepoint.com/sites/VN-BI-HCMCRS",
+            "site": "/sites/VN-BI-HNRS/Shared Documents/Test"
+        },
+
+    "credential_SqlAzure":
+        {
+            "server": "hkazdevsqld3vnreserch.database.windows.net,1433",
+            "database" : "D3VNResearch_Staging",
+            "username" : "D3VNResearch@savills.com.vn",
+            "password" : "Wy6bF!4ncy6U+vxN",
+            "auth":"ActiveDirectoryPassword"
+        }
+}
