@@ -1,5 +1,5 @@
 from Connection import *
-
+#IS_MainSystem: IS = Input String
 class MacroScript:
     def findFolderWithProvince(list_folder, selected_provinces  ,Year, Quarter):
         # Tìm các folder chứa từ khóa
