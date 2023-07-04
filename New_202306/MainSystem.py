@@ -84,10 +84,8 @@ class getData:
         print(colored("Year:{}, Quarter:{}".format(Year,Quarter),'yellow'))
         findFolder.findFolderWithProvince(list_folder, selected_provinces,Year,Quarter)
         list_url , df_summ_file = findFolder.findFolder(list_folder, selected_provinces, url_hub, Year, Quarter)
-        sector = input('Nhập sector ()')
         for i in list_url:
             sector = i.split('/')[-1].split('_')[0].upper()
-            
             if sector=='APARTMENT':
                 sector='APT'
             else:
@@ -176,6 +174,7 @@ class importData:
                     df_temp_flat_ip = pd.concat([df_temp_flat_ip, data], axis=0)
                     df_flat_ip = tracking_flat_file(df_temp_flat_ip, file_url)
                     if len(processed_data) != 0:
+                        df_new_key_ip= pd.DataFrame()
                         df_new_key_ip = check_new_key(df_new_key = df_new_key_ip, processed_data = processed_data, sector = sector)
                     #Get key and generate new key (if needed)
                     data = get_project_key(flag_key, processed_data, data, sector, engine)
@@ -454,6 +453,7 @@ class importData:
                 #Check dictionary
                 lst_dict = ['City', 'District', 'Status', 'Type', 'Grade']
                 lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status', 'Sub_Project_Type', 'Grade']
+                print(f'Start check dictionary {file_name}')
                 for i, j in zip(lst_cls, lst_dict):
                     data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)
                 if len(df_dict) == 0:
@@ -469,30 +469,35 @@ class importData:
                         df_temp_flat_retail = pd.concat([df_temp_flat_retail, data], axis=0)
                         df_flat_retail=tracking_flat_file(df_temp_flat_retail, file_url)
                         if len(processed_data) != 0:
+                            df_new_key_retail= pd.DataFrame()
                             df_new_key_retail = check_new_key(df_new_key = df_new_key_retail, processed_data = processed_data, sector = sector)
                     elif sector == 'OFFICE':
                         df_temp_flat_office = pd.DataFrame()
                         df_temp_flat_office = pd.concat([df_temp_flat_office, data], axis=0)
                         df_flat_office = tracking_flat_file(df_temp_flat_office, file_url)
                         if len(processed_data) != 0:
+                            df_new_key_office= pd.DataFrame()
                             df_new_key_office = check_new_key(df_new_key = df_new_key_office, processed_data = processed_data, sector = sector)
                     elif sector == 'HOTEL':
                         df_temp_flat_hotel = pd.DataFrame()
                         df_temp_flat_hotel = pd.concat([df_temp_flat_hotel, data], axis=0)
                         df_flat_hotel = tracking_flat_file(df_temp_flat_hotel, file_url)
                         if len(processed_data) != 0:
+                            df_new_key_hotel= pd.DataFrame()
                             df_new_key_hotel = check_new_key(df_new_key = df_new_key_hotel, processed_data = processed_data, sector = sector)
                     elif sector == 'SA' or sector=='SERVICED_APARTMENT':
                         df_temp_flat_sa = pd.DataFrame()
                         df_temp_flat_sa = pd.concat([df_temp_flat_sa, data], axis=0)
                         df_flat_sa = tracking_flat_file(df_temp_flat_sa, file_url)
                         if len(processed_data) != 0:
+                            df_new_key_sa= pd.DataFrame()
                             df_new_key_sa = check_new_key(df_new_key = df_new_key_sa, processed_data = processed_data, sector = sector)
                     elif sector == 'APT' or sector=='APARTMENT':
                         df_temp_flat_apt = pd.DataFrame()
                         df_temp_flat_apt = pd.concat([df_temp_flat_apt, data], axis=0)
                         df_flat_apt = tracking_flat_file(df_temp_flat_apt, file_url)
                         if len(processed_data) != 0:
+                            df_new_key_apt= pd.DataFrame()
                             df_new_key_apt = check_new_key(df_new_key = df_new_key_apt, processed_data = processed_data, sector = sector)
                     
                     elif sector == 'VLTH':
@@ -500,12 +505,17 @@ class importData:
                         df_temp_flat_vlth = pd.concat([df_temp_flat_vlth, data], axis=0)
                         df_flat_vlth = tracking_flat_file(df_temp_flat_vlth, file_url)
                         if len(processed_data) != 0:
+                            df_new_key_vlth= pd.DataFrame()
                             df_new_key_vlth = check_new_key(df_new_key = df_new_key_vlth, processed_data = processed_data, sector = sector) 
                     else:
                         pass
                     #Get key and generate new key (if needed)
                     data = get_project_key(flag_key, processed_data, data, sector, engine)
-                    insert_to_fresh(file_url, data, cnt_str)
+                    try:
+                        result = insert_to_fresh(file_url, data, cnt_str)
+                        print(colored("insert_to_fresh SUCESSFUL!",'green'))
+                    except Exception as e:
+                        print(colored("insert_to_fresh FAILED:",str(e),'red'))
                 else:
                     pass
 
