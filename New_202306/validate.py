@@ -150,6 +150,7 @@ def remove_unicode(data):
     return data.replace(r'\s+', ' ', regex=True)#remove line breaks from an excel cells
     
 def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, cnxn, sp_object):
+    print(sector)
     lower_function = lambda x: x.strip().lower() if isinstance(x, str) else x
     if parameter in ['City', 'District', 'Status', 'Indicator'
                      , 'Country', 'Industry'
@@ -193,11 +194,9 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
     #                                         , how='left'
     #                                         , left_on=f'{column_name}'
     #                                         , right_on=f'Raw_{parameter}')[f'Cleaned_{parameter}']
-
     # Hieu update - 31-05-2023
     #get_cleaned_type = lambda x: raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x,f'Cleaned_{parameter}'].values[0] #fix lỗi duplicate của hàm merge trên\
     get_cleaned_type = lambda x: raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x, f'Cleaned_{parameter}'].values[0] if len(raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x, f'Cleaned_{parameter}']) > 0 else None
-    print(get_cleaned_type)
     data[f'Convert_{parameter}'] = data[f'{column_name}'].map(get_cleaned_type)
     ## End - Hieu update - 31-05-2023
 
