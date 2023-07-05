@@ -188,6 +188,7 @@ class importData:
                 df_temp_flat_ip = pd.concat([df_temp_flat_ip, data], axis=0)
                 df_flat_ip = tracking_flat_file(df_temp_flat_ip, file_url)
                 if len(processed_data) != 0:
+                    df_new_key_ip= pd.DataFrame()
                     df_new_key_ip = check_new_key(df_new_key = df_new_key_ip, processed_data = processed_data, sector = sector)
                 #Get key and generate new key (if needed)
                 data = get_project_key(flag_key, processed_data, data, sector, engine)
