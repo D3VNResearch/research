@@ -542,7 +542,7 @@ def update_flat_file(sector, df_flat, df_update):
         return flag_update, df_merge
 #-------------------------------------------------------
 ###Insert to DB            
-def insert_to_fresh(file_url, data, cnxn):
+def insert_to_fresh(file_url, data, cnt_str):
 #     conn ='Driver={ODBC Driver 17 for SQL Server};Server=tcp:hkazdevsqld3vnreserch.database.windows.net,1433;Database=D3VNResearch_Staging;Uid=D3VNResearch@savills.com.vn;Pwd=Wy6bF!4ncy6U+vxN;Encrypt=yes;Authentication=ActiveDirectoryPassword;Connection Timeout=30;'
 #     quoted = quote_plus(conn)
 #     engine=create_engine('mssql+pyodbc:///?odbc_connect={}'.format(quoted))

@@ -84,6 +84,7 @@ class getData:
         print(colored("Year:{}, Quarter:{}".format(Year,Quarter),'yellow'))
         findFolder.findFolderWithProvince(list_folder, selected_provinces,Year,Quarter)
         list_url , df_summ_file = findFolder.findFolder(list_folder, selected_provinces, url_hub, Year, Quarter)
+        Subsector = input('Nhap Subsector: ')
         for i in list_url:
             sector = i.split('/')[-1].split('_')[0].upper()
             if sector=='APARTMENT':
@@ -91,7 +92,7 @@ class getData:
             else:
                 pass
             
-            if sector in ('VLTH'):#Chọn sector cần import: RETAIL, OFFICE, SA, HOTEL, APT, VLTH
+            if sector in (Subsector):#Chọn sector cần import: RETAIL, OFFICE, SA, HOTEL, APT, VLTH
                 url.append(i)
             else:
                 pass
@@ -224,6 +225,7 @@ class importData:
             #Check dictionary
             data, df_dict = check_dictionary(df_dict, file_name, data, 'City', 'City', sector, engine, sp_object)
             data, df_dict = check_dictionary(df_dict, file_name, data, 'Indicator', 'Indicator', sector, engine, sp_object)
+            print(df_dict)
             if len(df_dict) == 0:
                 print(colored('Validate succesfully','green'))
                 data = Generate_Additional_Columns(data,df_summ_file, Hub ,engine ,file_url)
@@ -232,7 +234,6 @@ class importData:
                 insert_to_fresh(file_url, data, cnt_str)
             else:
                 pass
-
 
     def importMacroCommentary(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub):
         '''Prepare ingredients'''
@@ -269,12 +270,15 @@ class importData:
     def importFDI(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub):
         '''Prepare ingredients'''
         columns_that_need_unidecode=['Project_Name', 'Business_Name', 'Investor_Name', 'Investor_Nationality'
-                                    , 'Industry_Lv1', 'Investment_Form', 'City', 'District'
+                                    , 'Industry_Lv1', 'Investment_Form', 'City', 'District', 'Investor_Address','Unit','Investor_Name_Domestic'
+                                    , 'Project_Objective', 'Scale', 'Duration', 'Project_Implement_Location', 'Headquarters_Address','Email'
+                                    , 'Capital_Contribute_Progress', 'Implement_Progress', 'Business_Representative'
                                     ]
+        engine = create_engine(cnt_str)
         #Create empty df for checking dictionary
         df_dict = pd.DataFrame(columns=['File_Name', 'Missing_Values', 'Flag'])
         df_temp_flat_fdi = pd.DataFrame()
-        engine = create_engine(cnt_str)
+        df_flat_fdi = pd.DataFrame()
         #-------------------------------------------------------
         '''Get data''' 
         for file_url in tqdm(list_url):
@@ -294,15 +298,15 @@ class importData:
             lst_cls = ['City', 'District', 'Project_Name', 'Investor_Nationality', 'Industry_Lv1', 'Investment_Form']
             for i, j in zip(lst_cls, lst_dict):
                 data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)
+            print(df_dict)
             if len(df_dict) == 0:
                 print(colored('Validate succesfully','green'))
                 data = Generate_Additional_Columns(data,df_summ_file,Hub,engine,file_url)
                 df_temp_flat_fdi = pd.concat([df_temp_flat_fdi, data], axis=0)
                 df_flat_fdi = tracking_flat_file(df_temp_flat_fdi, sector)
-                insert_to_fresh(file_url, df_flat_fdi, cnt_str)
+                insert_to_fresh(file_url, data, cnt_str)
             else:
                 pass
-
 
     def importInfra(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub):
         '''Prepare ingredients'''
@@ -332,6 +336,7 @@ class importData:
             lst_cls = ['City', 'District', 'Infrastructure_Level_1', 'Infrastructure_Level_2']
             for i, j in zip(lst_cls, lst_dict):
                 data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)
+            print(df_dict)
             if len(df_dict) == 0:
                 print(colored('Validate succesfully','green'))
                 data = Generate_Additional_Columns(data,df_summ_file,Hub,engine,file_url)
@@ -419,14 +424,14 @@ class importData:
         name_sector = [x.lower() for x in name_sector]
         for i in name_sector:
             globals()['df_temp_flat_{}'.format(i)] = pd.DataFrame([])
-            globals()['df_flat_{}'.format(i)] = pd.DataFrame([])
+            globals()['df_flat_{}'.format(i)] = pd.DataFrame([]) 
             globals()['df_new_key_{}'.format(i)] = pd.DataFrame([])  
         #-------------------------------------------------------
         '''Get data''' 
         for file_url in tqdm(list_url):  
             data, file_name, sector = get_data(url_hub, file_url)
             #-------------------------------------------------------
-            data = check_date_key(file_url, data)#Check format date_key in flat file   
+            data = check_date_key(file_url, data) #Check format date_key in flat file   
             data['Project_Name']= np.where(data['Project_Name'].isnull(), data['Sub_Project_Name'], data['Project_Name']) #Fill up project_name if its null
             #Check duplicate sub_name
             data, df_dup = check_duplicate(data, 'Sub_Project_Name')
@@ -450,12 +455,17 @@ class importData:
                     else:
                         pass   
                     data[i] = remove_unicode(data[i])
-                #Check dictionary
-                lst_dict = ['City', 'District', 'Status', 'Type', 'Grade']
-                lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status', 'Sub_Project_Type', 'Grade']
-                print(f'Start check dictionary {file_name}')
+                # Check dictionary
+                lst_dict = ['City', 'District', 'Status', 'Grade', 'Type']
+                lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status', 'Grade', 'Sub_Project_Type']
+                # lst_dict = ['City', 'District', 'Status']
+                # lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status']
+                #print('Before: \n',before_check)
                 for i, j in zip(lst_cls, lst_dict):
                     data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)
+                # after_check = data['Sub_Project_Type'].value_counts()
+                # print('After: \n',after_check)
+                print(df_dict)
                 if len(df_dict) == 0:
                     print(colored('Validate succesfully','green'))
                     #-------------------------------------------------------
@@ -519,12 +529,11 @@ class importData:
                 else:
                     pass
 
-
-
 def main():
     cnt_str = ConnectAzureSQLServer()
+    engine = create_engine(cnt_str)
     # set to_email
-    to_email = ['nthieu@savills.com.vn']
+    to_email = ['hcmcbi-intern04@savills.com.vn']
     selected_provinces = [] 
     while(True):
         Sector= input("Nhập Sector bạn muốn lấy data: ")
@@ -546,18 +555,19 @@ def main():
             list_url, df_summ_file = findFolder.findFolderYearToQuar(list_folder, getData.getQuarter(list_folder, url_hub), Hub, Year, Quarter)
             selected_provinces.clear()
             importData.importMacroCommentary(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
-        # if (Sector == 'FDI'):   ####Cai nay loi~ :((((
-        #     quarter_year = input("Nhập chuỗi năm và quý (ví dụ: 2023Q1): ")
-        #     Year, Quarter = quarter_year[:4], quarter_year[4:]
-        #     list_url, df_summ_file = findFolder.findFolderYearToQuar(list_folder, getData.getQuarter(list_folder, url_hub), Hub, Year, Quarter)
-        #     selected_provinces.clear()
-        #     importData.importFDI(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
+        if (Sector == 'FDI'): 
+            quarter_year = input("Nhập chuỗi năm và quý (ví dụ: 2023Q1): ")
+            Year, Quarter = quarter_year[:4], quarter_year[4:]
+            list_url, df_summ_file = findFolder.findFolderYearToQuar(list_folder, getData.getQuarter(list_folder, url_hub), Hub, Year, Quarter)
+            selected_provinces.clear()
+            importData.importFDI(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
         if (Sector == 'IP'):
             list_url, df_summ_file = getData.getFile(list_folder, selected_provinces, url_hub) 
             print(list_url)
             selected_provinces.clear()
             importData.importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ_file, Hub)
         if (Sector == 'Main Sector'):
+            #list_url, df_summ_file = getData.getFileMainSector(list_folder, selected_provinces, url_hub) 
             list_url, df_summ_file = getData.getFile(list_folder, selected_provinces, url_hub) 
             selected_provinces.clear()
             importData.importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
@@ -565,9 +575,10 @@ def main():
             list_url, df_summ_file = getData.getFile(list_folder, selected_provinces, url_hub) 
             selected_provinces.clear()
             importData.importProductMix(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
+
+
 if __name__ == "__main__":
     main()
-
 
 
 

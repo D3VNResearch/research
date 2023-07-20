@@ -33,7 +33,6 @@ from unidecode import unidecode
 from termcolor import colored
 
 #get data
-
 def get_data(relative_url, file_url):
     header_BIHub = 'share_point_BIHub'
     config_BIHub = read_config_json(config_path, header_BIHub)
@@ -152,7 +151,7 @@ def remove_unicode(data):
 def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, cnxn, sp_object):
     lower_function = lambda x: x.strip().lower() if isinstance(x, str) else x
     if parameter in ['City', 'District', 'Status', 'Indicator'
-                     , 'Country', 'Industry'
+                     , 'Country', 'Industry', 'Ward'
                     ]:
         raw_parameter = pd.read_sql(f'select * from GENERAL.{parameter}_Dictionary',cnxn)
         raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
@@ -187,28 +186,21 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
     else:
         print(colored('Unknown parameter in check dictionary section','yellow'))
         return data, df_dict 
-    #print('Before: ',data['Grade'])
+    
     data[f'{column_name}']= data[f'{column_name}'].apply(lower_function)
-    # data[f'Convert_{parameter}'] = pd.merge(data, raw_parameter
-    #                                         , how='left'
-    #                                         , left_on=f'{column_name}'
-    #                                         , right_on=f'Raw_{parameter}')[f'Cleaned_{parameter}']
+    data[f'Convert_{parameter}'] = pd.merge(data, raw_parameter
+                                            , how='left'
+                                            , left_on=f'{column_name}'
+                                            , right_on=f'Raw_{parameter}')[f'Cleaned_{parameter}']
+
     # Hieu update - 31-05-2023
-    #get_cleaned_type = lambda x: raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x,f'Cleaned_{parameter}'].values[0] #fix lỗi duplicate của hàm merge trên\
-    get_cleaned_type = lambda x: raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x, f'Cleaned_{parameter}'].values[0] if len(raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x, f'Cleaned_{parameter}']) > 0 else None
-    data[f'Convert_{parameter}'] = data[f'{column_name}'].map(get_cleaned_type)
+    # get_cleaned_type = lambda x: raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x,f'Cleaned_{parameter}'].values[0] #fix lỗi duplicate của hàm merge trên\
+    # print(get_cleaned_type)
+    # data[f'Convert_{parameter}'] = data[f'{column_name}'].map(get_cleaned_type)
     ## End - Hieu update - 31-05-2023
-    # print(data[['Grade','Convert_Grade']])
-    if parameter == 'Grade' or parameter == 'Type':
-        temp = data[[f'{column_name}',f'Convert_{parameter}']].dropna()
-        parameter_not_in_dict = temp[f'{column_name}'][temp[f'Convert_{parameter}'].isnull()]
-        
-    else:
-        parameter_not_in_dict = data[f'{column_name}'][data[f'Convert_{parameter}'].isnull()]
-    print(parameter_not_in_dict)
-   # print(parameter_not_in_dict_temp)
-    # print(data['Grade'])
-    #print(data)
+
+    parameter_not_in_dict = data[f'{column_name}'][data[f'Convert_{parameter}'].isnull()]
+    
     if len(parameter_not_in_dict) != 0:
         temp_df = pd.DataFrame()
         parameter_not_in_dict = list(set(parameter_not_in_dict))
@@ -267,6 +259,7 @@ def Generate_Additional_Columns(data,df_summ_file,BIHub,engine,file_url):
     project_name=project_name.split('.')[0]
     data['File_Name']=project_name 
     return data
+
 
 #-------------------------------------------------------
 ###Create tracking dataframe for flat file
@@ -1215,7 +1208,7 @@ def insert_to_fresh(file_url, data, cnt_str):
                            'Avg_Gross_Rent', 'Avg_Net_Rent','New_Supply'
                            ]
         for i in list_float_columns:
-            if i not in data.columns: 
+            if i not in data.columns:
                 data[i] = np.nan
             else:
                 pass
@@ -1352,6 +1345,21 @@ def insert_to_fresh(file_url, data, cnt_str):
         for i in list_date_columns:
             data[i] = pd.to_datetime(data[i],format='%Y-%m-%d', errors='coerce')
         data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')
+    elif sector == 'SAMSUNG':
+        table_name = 'SAMSUNG_Retailer_Input'
+#         list_float_columns = ['Registered_FDI', 'Additional_FDI'
+#                              ]
+#         list_str_columns = ['Business_Name', 'Investor_Name'
+#                            ]
+#         list_date_columns = ['Registered_Date', 'Additional_FDI_Date'
+#                             ]
+#         for i in list_float_columns:
+#             data[i] = data[i].apply(convert_float).replace('\.0$','', regex=True)
+#         for i in list_str_columns:
+#             data[i] = data[i].apply(lambda x: x.title() if isinstance(x, str) else x)
+#         for i in list_date_columns:
+#             data[i] = pd.to_datetime(data[i],format='%Y-%m-%d', errors='coerce')
+        data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')   
         
     elif sector == 'INFRA':
         table_name = 'Infrastructure'
