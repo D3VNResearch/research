@@ -141,13 +141,13 @@ def deunicode_funtion(s):
     else:
         s=s
     return str(s)
-
+    
 def remove_unicode(data):
     data = data.fillna('NULL')
     data = data.apply(lambda x:deunicode_funtion(x) if x!=None else x)
     data = data.replace('NULL',np.nan)
     data = data.replace({np.nan: None})
-    return data.replace(r'\s+', ' ', regex=True)#remove line breaks from an excel cells
+    return data.replace(r'\s+', ' ', regex=True) #remove line breaks from an excel cells
     
 def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, cnxn, sp_object):
     lower_function = lambda x: x.strip().lower() if isinstance(x, str) else x
@@ -201,8 +201,7 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
     # print(data[['Grade','Convert_Grade']])
     if parameter == 'Grade' or parameter == 'Type':
         temp = data[[f'{column_name}',f'Convert_{parameter}']].dropna()
-        parameter_not_in_dict = temp[f'{column_name}'][temp[f'Convert_{parameter}'].isnull()]
-        
+        parameter_not_in_dict = temp[f'{column_name}'][temp[f'Convert_{parameter}'].isnull()]        
     else:
         parameter_not_in_dict = data[f'{column_name}'][data[f'Convert_{parameter}'].isnull()]
     print(parameter_not_in_dict)

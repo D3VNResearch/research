@@ -76,10 +76,11 @@ class getData:
         # Input Năm và Quý
         quarter_year = input("Nhập chuỗi năm và quý (ví dụ: 2023Q1): ")
         Year, Quarter = quarter_year[:4], quarter_year[4:]
-
+        choose_province = ''
         # In danh sách tỉnh đã chọn, năm và quý
         print("Các tỉnh đã chọn:")
         for province in getData.GetProvince(input_string, list_folder ,selected_provinces):
+            choose_province = province
             print(colored(province,'yellow'))
         print(colored("Year:{}, Quarter:{}".format(Year,Quarter),'yellow'))
         findFolder.findFolderWithProvince(list_folder, selected_provinces,Year,Quarter)
@@ -104,10 +105,11 @@ class getData:
         # Input Năm và Quý
         quarter_year = input("Nhập chuỗi năm và quý (ví dụ: 2023Q1): ")
         Year, Quarter = quarter_year[:4], quarter_year[4:]
-
+        choose_province = ''
         # In danh sách tỉnh đã chọn, năm và quý
         print("Các tỉnh đã chọn:")
         for province in getData.GetProvince(input_string, list_folder ,selected_provinces):
+            choose_province = province
             print(colored(province,'yellow'))
         print(colored("Year:{}, Quarter:{}".format(Year,Quarter),'yellow'))
         findFolder.findFolderWithProvince(list_folder, selected_provinces,Year,Quarter)
@@ -383,7 +385,7 @@ class importData:
             lst_dict = ['City', 'District', 'Type', 'Grade']
             lst_cls = ['Project_City_Name', 'Project_District_Name', 'Sub_Project_Type', 'Grade']
             for i, j in zip(lst_cls, lst_dict):
-                data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)
+                data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object, province)
             if len(df_dict) == 0:
                 print(colored('Validate succesfully','green'))
                 #-------------------------------------------------------
@@ -544,7 +546,7 @@ def main():
         if (Sector == 'Macro Economic' or Sector == 'macro economic'):
             list_url, df_summ_file = getData.getFile(list_folder, selected_provinces, url_hub)
             selected_provinces.clear()
-            importData.importMacroEconomic(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
+            importData.importMacroEconomic(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub, )
         if (Sector == 'Infra'):
             list_url, df_summ_file = getData.getFile(list_folder, selected_provinces, url_hub)
             selected_provinces.clear()
@@ -567,8 +569,8 @@ def main():
             selected_provinces.clear()
             importData.importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ_file, Hub)
         if (Sector == 'Main Sector'):
-            #list_url, df_summ_file = getData.getFileMainSector(list_folder, selected_provinces, url_hub) 
-            list_url, df_summ_file = getData.getFile(list_folder, selected_provinces, url_hub) 
+            list_url, df_summ_file = getData.getFileMainSector(list_folder, selected_provinces, url_hub) 
+            #list_url, df_summ_file = getData.getFile(list_folder, selected_provinces, url_hub) 
             selected_provinces.clear()
             importData.importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
         if(Sector == 'Product Mix'):
