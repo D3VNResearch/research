@@ -24,12 +24,12 @@
             "site": "/sites/VN-BI-HNRS/Shared Documents/Test"
         },
 
-    "credential_SqlAzure":
-        {
-            "server": "hkazdevsqld3vnreserch.database.windows.net,1433",
-            "database" : "D3VNResearch_Staging",
-            "username" : "D3VNResearch@savills.com.vn",
-            "password" : "Wy6bF!4ncy6U+vxN",
-            "auth":"ActiveDirectoryPassword"
-        }
+    // "credential_SqlAzure":
+    //     {
+    //         "server": "hkazdevsqld3vnreserch.database.windows.net,1433",
+    //         "database" : "D3VNResearch_Staging",
+    //         "username" : "D3VNResearch@savills.com.vn",
+    //         "password" : "Wy6bF!4ncy6U+vxN",
+    //         "auth":"ActiveDirectoryPassword"
+    //     }
 }
