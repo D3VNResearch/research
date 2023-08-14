@@ -116,6 +116,22 @@ class getData:
         list_url , df_summ_file = findFolder.findFolder(list_folder, selected_provinces, url_hub, Year, Quarter)
         list_url = getData.getListImportFile(list_url)
         return list_url, df_summ_file
+
+def Send_Email_IP(to_email,df_flat_ip,df_new_key_ip, cnt_str):
+    list_df_flat = [df_flat_ip]
+    list_df_new_key = [df_new_key_ip]
+    engine = create_engine(cnt_str)
+
+    #Email notify imported data
+    df_flat_html, df_query_html = convert_df_to_html(type_html = 3, list_df = list_df_flat, type_sector = 2, cnxn = engine)
+    run_email(type_sector = 'IP', email_type = 3, user_email = to_email, df_flat_html = df_flat_html, df_query_html = df_query_html)
+
+    #Email notify create new key
+    df_new_key_html = convert_df_to_html(type_html = 4, list_df = list_df_new_key, cnxn = engine)
+    if len(df_new_key_html) != 0:
+        print(colored('Some new keys were created','yellow'))
+        run_email(type_sector = 'IP', email_type = 4, user_email = to_email, df_noti_html = df_new_key_html)        
+
 class importData:
     def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ_file, Hub):
         columns_that_need_unidecode=['Project_Name', 'Sub_Project_Name', 'Developer_Name'
@@ -147,7 +163,9 @@ class importData:
                 print(colored('Check duplicate sub_name', 'yellow'))
                 df_noti_html = convert_df_to_html(type_html = 1, df = df_dup, type_sector = 2, cnxn = engine)
                 run_email(type_sector = 'IP', email_type = 1, user_email = to_email, df_noti_html = df_noti_html)
-            else:       
+            else:
+                df_flat_ip = pd.DataFrame()   
+                df_new_key_ip= pd.DataFrame()
                 #-------------------------------------------------------
                 
                 '''Validation step'''
@@ -177,12 +195,12 @@ class importData:
                     df_temp_flat_ip = pd.concat([df_temp_flat_ip, data], axis=0)
                     df_flat_ip = tracking_flat_file(df_temp_flat_ip, file_url)
                     if len(processed_data) != 0:
-                        df_new_key_ip= pd.DataFrame()
+                        
                         df_new_key_ip = check_new_key(df_new_key = df_new_key_ip, processed_data = processed_data, sector = sector)
                     #Get key and generate new key (if needed)
                     data = get_project_key(flag_key, processed_data, data, sector, engine)
                     #insert_to_fresh(file_url, data, cnt_str)
-                    
+                    #Send_Email_IP(to_email,df_flat_ip,df_new_key_ip, cnt_str)
                     #Test insert_to_fresh
                     try:
                         result = insert_to_fresh(file_url, data, cnt_str)
@@ -531,11 +549,13 @@ class importData:
                 else:
                     pass
 
+
+
 def main():
     cnt_str = ConnectAzureSQLServer()
     engine = create_engine(cnt_str)
     # set to_email
-    to_email = ['hcmcbi-intern04@savills.com.vn']
+    to_email = ['hcmcbi-intern04@savills.com.vn', 'nthieu@savills.com.vn']
     selected_provinces = [] 
     while(True):
         Sector= input("Nhập Sector bạn muốn lấy data: ")

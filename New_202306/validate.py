@@ -910,7 +910,7 @@ def get_project_key(flag_key, processed_data, data, sector, engine):
             processed_data[i]=processed_data[i].str.title()
         if sector != 'IP':
             processed_data['Sector'] = processed_data['Sector'].str.upper()
-        else:
+        else: 
             pass
         #-------------------------------------------------------     
         processed_data[list_column_name_insert_project].to_sql(f'{table_name}', 

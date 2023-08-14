@@ -214,6 +214,7 @@ class importData:
 
     def importMacroEconomic(list_folder, url_hub, file_url,cnt_str, sp_object,df_summ_file, Hub):
         '''Prepare ingredients'''
+        print('Start validate and import')
         columns_that_need_unidecode=['City', 'District', 'Indicator', 'Attribute_lv1', 'Attribute_lv2', 
                                     'Indicator_Unit', 'Source'
                                     ]
@@ -399,7 +400,6 @@ def inputStringFile():
     for file_name in file_names:
     # Remove leading/trailing whitespaces
         file_name = file_name.strip()
-
         # Extract sector, province, and date
         sector, province, date_ext = file_name.split('_')
 
@@ -431,19 +431,20 @@ def inputStringFile():
             quarter = 'Q4'
         quarters.append(quarter)
     selected_year_quarter = []
-    url_hub = []
-    Hub = []
-    list_folder =[]
+    url_hub = '/sites/BIHub/Shared Documents/Advisory Data/Macro Economic/Flat file'
+    Hub = ConnectSharePoint(url_hub)
+    list_folder=Hub.get_content_url(url_hub, return_list_folder=True)
+    selected_provinces = getData.GetProvinceIS(provinces, list_folder)
     for item in range (len(sectors)):
-        url_hub.append(f'/sites/BIHub/Shared Documents/Advisory Data/{sectors[item]}/Flat file')
-        Hub.append(ConnectSharePoint(url_hub[item]))
-        list_folder.append(Hub[item].get_content_url(url_hub[item], return_list_folder=True))
-        selected_provinces = getData.GetProvinceIS(provinces, list_folder[item])
-        folder_sub2 = f"{url_hub[item]}/{selected_provinces[item]}/{years[item]}/{quarters[item]}"
+        # url_hub.append(f'/sites/BIHub/Shared Documents/Advisory Data/{sectors[item]}/Flat file')
+        # Hub.append(ConnectSharePoint(url_hub[item]))
+        # list_folder.append(Hub.get_content_url(url_hub, return_list_folder=True))
+        # selected_provinces = getData.GetProvinceIS(provinces, list_folder[item])
+        folder_sub2 = f"{url_hub}/{selected_provinces[item]}/{years[item]}/{quarters[item]}"
         selected_year_quarter.append(folder_sub2)
     df_summ_file = pd.DataFrame({'Name':[],'ServerRelativeUrl':[], 'TimeLastModified':[], 'ModTime':[], 'Modified_by_ID':[]})
     for i, url in enumerate(selected_year_quarter):
-        df_summ_file = pd.concat([df_summ_file, Hub[i].get_content_url(url)])
+        df_summ_file = pd.concat([df_summ_file, Hub.get_content_url(url)])
     list_url = df_summ_file['ServerRelativeUrl'].to_list()
     url = []
     for i in list_url:
@@ -461,12 +462,12 @@ def main():
     to_email = ['nthieu@savills.com.vn', 'hcmcbi-intern04@savills.com .vn']
     selected_provinces = [] 
     list_folder, url_hub, Hub, Sectors, url , df_summ_file = inputStringFile()
+    sp_object = url_hub.split('/')[2].replace('-','') 
     for i in range(len(Sectors)):
-        sp_object = url_hub[i].split('/')[2].replace('-','') 
         if (Sectors[i] == 'Macro economic'):
-            importData.importMacroEconomic(list_folder[i], url_hub[i], url[i] ,cnt_str, sp_object,df_summ_file, Hub[i])
+            importData.importMacroEconomic(list_folder[i], url_hub, url[i] ,cnt_str, sp_object,df_summ_file, Hub)
         if (Sectors[i] == 'IP'):
-            importData.importIP(list_folder[i], url_hub[i], url[i], to_email,cnt_str, sp_object,df_summ_file, Hub[i])
+            importData.importIP(list_folder[i], url_hub, url[i], to_email,cnt_str, sp_object,df_summ_file, Hub)
 if __name__ == "__main__":
     main()
 
