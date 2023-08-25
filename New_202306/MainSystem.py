@@ -440,7 +440,7 @@ class importData:
         #Create empty df for checking dictionary
         df_dict = pd.DataFrame(columns=['File_Name', 'Missing_Values', 'Flag'])
         #Create multi empty df for tracking autdit step
-        name_sector = ['RETAIL', 'SA', 'APT', 'VLTH', 'OFFICE', 'HOTEL']
+        name_sector = ['RETAIL', ' 5`SA', 'APT', 'VLTH', 'OFFICE', 'HOTEL']
         name_sector = [x.lower() for x in name_sector]
         for i in name_sector:
             globals()['df_temp_flat_{}'.format(i)] = pd.DataFrame([])

@@ -142,7 +142,7 @@ def main():
         if (Sector == 'Macro Economic' or Sector == 'macro economic'):
             list_url, df_summ_file = getFile(list_folder, selected_provinces, url_hub)
             selected_provinces.clear()
-            importMacroEconomic(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub, )
+            importMacroEconomic(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
 
 
 if __name__ == "__main__":

@@ -218,8 +218,7 @@ class importData:
         columns_that_need_unidecode=['City', 'District', 'Indicator', 'Attribute_lv1', 'Attribute_lv2', 
                                     'Indicator_Unit', 'Source'
                                     ]
-        #Create empty df for checking dictionary
-        df_dict = pd.DataFrame(columns=['File_Name', 'Missing_Values', 'Flag'])
+        #Create empty df for checking dictionary        df_dict = pd.DataFrame(columns=['File_Name', 'Missing_Values', 'Flag'])
         df_temp_flat_macro = pd.DataFrame()
         df_flat_macro = pd.DataFrame()
         engine = create_engine(cnt_str)

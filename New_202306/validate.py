@@ -592,6 +592,8 @@ def tracking_flat_file(data, file_url):
 
 def check_project_key(file_url, data, sector, engine):
     flag_key=0
+    list_keys = []
+    list_keys_on= []
     if 'Project_Key' not in data.columns:
         data['Project_Key'] = np.nan
         data['Project_Key'] = data['Project_Key'].replace({np.nan: None})
@@ -1647,7 +1649,10 @@ def create_content(type_content = None, type_sector = None, list_df = None, df_n
                 for i in df_query.columns:
                     if i == 'Sector':
                         df_query_converted = df_query.data
-                        sector = df_query_converted[i].iloc[0]
+                        sector = ''
+                        if not df_query_converted.empty:
+                            sector = df_query_converted[i].iloc[0]
+                        #sector = df_query_converted[i].iloc[0]
                         df_query_html += '''<b><p style="font-size:85%; color: #736F6D">''' + sector + "</b></p>" + df_query.to_html() + "<br>"
             return df_query_html
                 
