@@ -118,7 +118,7 @@ def Send_Email_IP(to_email,df_flat_ip,df_new_key_ip, cnt_str):
 
 def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ_file, Hub):
         columns_that_need_unidecode=['Project_Name', 'Sub_Project_Name', 'Developer_Name'
-                             , 'City', 'District', 'Target_Industry']
+                             , 'City', 'District', 'Target_Industry', 'Developer_Nationality']
         engine = create_engine(cnt_str)
         #Create empty df for checking dictionary
         df_dict = pd.DataFrame(columns=['File_Name', 'Missing_Values', 'Flag'])

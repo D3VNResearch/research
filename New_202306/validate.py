@@ -198,10 +198,10 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
     get_cleaned_type = lambda x: raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x, f'Cleaned_{parameter}'].values[0] if len(raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x, f'Cleaned_{parameter}']) > 0 else None
     data[f'Convert_{parameter}'] = data[f'{column_name}'].map(get_cleaned_type)
     ## End - Hieu update - 31-05-2023
-    # print(data[['Grade','Convert_Grade']])
+    #print(data[['Grade','Convert_Grade']])
     if parameter == 'Grade' or parameter == 'Type':
         temp = data[[f'{column_name}',f'Convert_{parameter}']].dropna()
-        parameter_not_in_dict = temp[f'{column_name}'][temp[f'Convert_{parameter}'].isnull()]        
+        parameter_not_in_dict = temp[f'{column_name}'][temp[f'Convert_{parameter}'].isnull()]      
     else:
         parameter_not_in_dict = data[f'{column_name}'][data[f'Convert_{parameter}'].isnull()]
     print(parameter_not_in_dict)
@@ -1852,8 +1852,8 @@ def check_new_key(df_new_key = None, processed_data = None, sector = None):
     #df_new_key = df_new_key.reindex(columns = list_dim_columns)
     if f'{sector}' != 'IP':
         df_new_key = df_new_key.sort_values(by = ['Project_City_Name', 'Launch_Year'],ascending=True, na_position='first', ignore_index=True)
-    elif f'{sector}' == 'IP':
-        df_new_key = df_new_key.sort_values(by = ['City', 'Launch_Year'],ascending=True, na_position='first', ignore_index=True)
+    # elif f'{sector}' == 'IP':
+    #     df_new_key = df_new_key.sort_values(by = ['City', 'Launch_Year'],ascending=True, na_position='first', ignore_index=True)
     
     return df_new_key
     
