@@ -101,16 +101,20 @@ def check_duplicate_IP_Tenant(data, column_name):
     duplicate_dfs = []
 
     for value in unique_values_Date_Key:
-        filtered_data_Date_Key = data[data['Date_Key'] == value]
-        duplicates = filtered_data_Date_Key[filtered_data_Date_Key.duplicated(subset=[column_name], keep='last')]
-        if not duplicates.empty:
-            duplicate_dfs.append(duplicates)
+        for value in unique_values_SPN:
+            filtered_data_Date_Key = data[data['Date_Key'] == value]
+            duplicates_DK = filtered_data_Date_Key[filtered_data_Date_Key.duplicated(subset=[column_name], keep='last')]
+            filtered_data_SPN = data[data['Sub_Project_Name'] == value]
+            duplicates_SPN = filtered_data_SPN[filtered_data_SPN.duplicated(subset=[column_name], keep='last')]
+            if (not duplicates_DK.empty) and (not duplicates_SPN.empty) :
+                duplicate_dfs.append(duplicates_DK)
+                duplicate_dfs.append(duplicates_SPN)
 
-    for value in unique_values_SPN:
-        filtered_data_SPN = data[data['Sub_Project_Name'] == value]
-        duplicates = filtered_data_SPN[filtered_data_SPN.duplicated(subset=[column_name], keep='last')]
-        if not duplicates.empty:
-            duplicate_dfs.append(duplicates)
+    # for value in unique_values_SPN:
+    #     filtered_data_SPN = data[data['Sub_Project_Name'] == value]
+    #     duplicates = filtered_data_SPN[filtered_data_SPN.duplicated(subset=[column_name], keep='last')]
+    #     if not duplicates.empty:
+    #         duplicate_dfs.append(duplicates)
 
     if duplicate_dfs:
         df_dup = pd.concat(duplicate_dfs)
@@ -292,6 +296,10 @@ def importIP_Tenant(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,
                     #insert_to_fresh(file_url, data, cnt_str)
                     #Send_Email_IP(to_email, df_flat_ip, df_new_key_ip, cnt_str)
                     #Test insert_to_fresh
+                    for i in data.columns:
+                        if i == 'IP_Tenant_Key':
+                            data.drop('IP_Tenant_Key', axis=1, inplace=True)
+                            data.drop('Is_New', axis=1, inplace=True)
                     try:
                         result = insert_to_fresh_IP_Tenant(file_url, data, cnt_str)
                         print(colored("insert_to_fresh SUCESSFUL!",'green'))

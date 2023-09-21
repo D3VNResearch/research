@@ -881,7 +881,7 @@ def get_project_key(flag_key, processed_data, data, sector, engine):
         list_column_name_insert_project = ['Project_Name','Sub_Project_Name','Latitude','Longtitude'
                                            ,'Phase', 'Zone', 'City', 'District', 'Project_Sub_Type'
                                            , 'Project_Type', 'Developer_Name', 'Date_Key', 'File_Date', 'Import_Date'
-                                          ]
+                                          ]                          
     if sector not in ['IP', 'TENANT']:
         table_name = 'Main_Sector_Project'
     else:
@@ -914,13 +914,22 @@ def get_project_key(flag_key, processed_data, data, sector, engine):
             processed_data['Sector'] = processed_data['Sector'].str.upper()
         else: 
             pass
+        if sector == 'IP':
+            processed_data[list_column_name_insert_project] = processed_data[list_column_name_insert_project].drop_duplicates(subset=['Sub_Project_Name', 'District', 'City', 'Project_Sub_Type'])
+            processed_data[list_column_name_insert_project].to_sql(f'{table_name}', 
+                                                                engine, 
+                                                                index=False, 
+                                                                if_exists='append', 
+                                                                schema='FRESH'
+                                                                )
         #-------------------------------------------------------     
-        processed_data[list_column_name_insert_project].to_sql(f'{table_name}', 
-                                                               engine, 
-                                                               index=False, 
-                                                               if_exists='append', 
-                                                               schema='FRESH'
-                                                              )
+        else:
+            processed_data[list_column_name_insert_project].to_sql(f'{table_name}', 
+                                                                engine, 
+                                                                index=False, 
+                                                                if_exists='append', 
+                                                                schema='FRESH'
+                                                                )
         #Get key
         if sector in ['VLTH', 'RETAIL']:
             data = data.rename(columns = {'Sub_Project_Type':'Project_Type'})

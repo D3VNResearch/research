@@ -133,6 +133,7 @@ def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ
         '''Get data''' 
         print('Start Get Data...')
         for file_url in tqdm(list_url):  
+            print(file_url)
             data, file_name, sector = get_data(url_hub, file_url)
             #-------------------------------------------------------
             #data = check_date_key(file_url, data)#Check format date_key in flat file   
@@ -177,9 +178,15 @@ def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ
                     df_temp_flat_ip = pd.DataFrame() 
                     df_temp_flat_ip = pd.concat([df_temp_flat_ip, data], axis=0)
                     df_flat_ip = tracking_flat_file(df_temp_flat_ip, file_url)
-                    if len(processed_data) != 0:
-                        
+                    if len(processed_data) != 0: 
                         df_new_key_ip = check_new_key(df_new_key = df_new_key_ip, processed_data = processed_data, sector = sector)
+                        df_new_key_ip = df_new_key_ip.drop_duplicates(subset=['Sub_Project_Name', 'District', 'City', 'Project_Sub_Type'])
+                    combine_key=data['City']+data['District']+data['Sub_Project_Name']+data['Project_Sub_Type']
+                    list_combine_key=[]
+                    list_combine_key.append(combine_key)
+                    count_num = list_combine_key.count(combine_key)
+                    if count_num> 1:
+                        print(combine_key)
                     #Get key and generate new key (if needed)
                     data = get_project_key(flag_key, processed_data, data, sector, engine)
                     #insert_to_fresh(file_url, data, cnt_str)
