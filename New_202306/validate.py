@@ -199,7 +199,8 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
     data[f'Convert_{parameter}'] = data[f'{column_name}'].map(get_cleaned_type)
     ## End - Hieu update - 31-05-2023
     #print(data[['Grade','Convert_Grade']])
-    if parameter == 'Grade' or parameter == 'Type':
+    print('parameter: ', parameter)
+    if parameter == 'Grade' or parameter == 'Type' or parameter == 'Investment_Form':
         temp = data[[f'{column_name}',f'Convert_{parameter}']].dropna()
         parameter_not_in_dict = temp[f'{column_name}'][temp[f'Convert_{parameter}'].isnull()]      
     else:

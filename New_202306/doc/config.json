@@ -10,10 +10,10 @@
         },
     "share_point_BIHub": 
         {
-            "client_id": "9e134518-8744-49cf-860e-212e3dfb685f",
-            "client_secret": "yc2GArr6DXuOOKXchx1LtxCFW3Xq1DV0JqTVXzXNT0I=",
+            "client_id": "85df864e-c590-472a-a50f-6649213d7e43",
+            "client_secret": "ywaulXwzB62SdCzp9LuWvBF1sN/9WadDVZIcy1B93PU=",
             "url": "https://savills.sharepoint.com/sites/BIHub",
-            "site": "/sites/VN-BI-HNRS/Shared Documents/Test"
+            "site": "/sites/BIHub/"
         },
 
     "share_point_VNBIHCM": 
@@ -23,10 +23,9 @@
             "url": "https://savills.sharepoint.com/sites/VN-BI-HCMCRS",
             "site": "/sites/VN-BI-HNRS/Shared Documents/Test"
         },
-
     "credential_SqlAzure":
         {
-            "server": "hkazdevsqld3vnreserch.database.windows.net",
+            "server": "hkazdevsqld3vnreserch.database.windows.net,1433",
             "database" : "D3VNResearch_Staging",
             "username" : "D3VNResearch@savills.com.vn",
             "password" : "Wy6bF!4ncy6U+vxN",

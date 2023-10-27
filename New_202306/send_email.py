@@ -25,7 +25,6 @@ def run_email(type_sector = None, email_type = None, user_email = None, df_flat_
     result = app.acquire_token_for_client(scopes=scopes)
     result = app.acquire_token_silent(scopes = scopes, account=None)
     email_type = int(email_type)
-
     list_email_format = []
     for i in user_email:
         list_email_format.append({'EmailAddress': {'Address': i}})
@@ -97,7 +96,7 @@ def run_email(type_sector = None, email_type = None, user_email = None, df_flat_
                     + f'{df_noti_html}' \
                     + design_table \
                     
-    if "access_token" in result:
+    try:
         userId = "D3VNResearch@savills.com.vn"
         endpoint = f'https://graph.microsoft.com/v1.0/users/{userId}/sendMail'
         #toUserEmail = "nngocphuonguyen@savills.com.vn"
@@ -114,10 +113,8 @@ def run_email(type_sector = None, email_type = None, user_email = None, df_flat_
             print('Sent email successfully')
         else:
             print(r.json())
-    else:
-        print(result.get("error"))
-        print(result.get("error_description"))
-        print(result.get("correlation_id"))
+    except Exception as e:
+        print("Error: ", e)
 
 
 """def main(req: func.HttpRequest) -> func.HttpResponse:
