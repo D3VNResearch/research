@@ -512,11 +512,11 @@ def get_project_key_MainSector(flag_key, processed_data, data, sector, engine):
             processed_data[list_column_name_insert_project] = processed_data[list_column_name_insert_project].drop_duplicates(subset=['Sector', 'Sub_Project_Name','Project_District_Name','Project_City_Name','Project_Type'])
             df_data = pd.DataFrame(processed_data[list_column_name_insert_project])
             # Read the existing Excel file into a DataFrame
-            existing_df = pd.read_excel("Data_parameter.xlsx", sheet_name="Sheet1")
-            # Concatenate the new data with the existing dat
-            final_df = pd.concat([existing_df, df_data], ignore_index=True)
-            # Save the concatenated DataFrame back to the Excel file
-            final_df.to_excel("Data_parameter.xlsx", index=False, sheet_name="Sheet1")
+            # existing_df = pd.read_excel("Data_parameter.xlsx", sheet_name="Sheet1")
+            # # Concatenate the new data with the existing dat
+            # final_df = pd.concat([existing_df, df_data], ignore_index=True)
+            # # Save the concatenated DataFrame back to the Excel file
+            # final_df.to_excel("Data_parameter.xlsx", index=False, sheet_name="Sheet1")
             processed_data[list_column_name_insert_project].to_sql(f'{table_name}', 
                                                                 engine, 
                                                                 index=False, 
@@ -532,11 +532,11 @@ def get_project_key_MainSector(flag_key, processed_data, data, sector, engine):
             processed_data[list_column_name_insert_project] = processed_data[list_column_name_insert_project].drop_duplicates(subset=['Sector', 'Sub_Project_Name','Project_District_Name','Project_City_Name','Project_Grade'])
             df_data = pd.DataFrame(processed_data[list_column_name_insert_project])
             # Read the existing Excel file into a DataFrame
-            existing_df = pd.read_excel("Data_parameter.xlsx", sheet_name="Sheet1")
-            # Concatenate the new data with the existing dat
-            final_df = pd.concat([existing_df, df_data], ignore_index=True)
+            # existing_df = pd.read_excel("Data_parameter.xlsx", sheet_name="Sheet1")
+            # # Concatenate the new data with the existing dat
+            # final_df = pd.concat([existing_df, df_data], ignore_index=True)
             # Save the concatenated DataFrame back to the Excel file
-            final_df.to_excel("Data_parameter.xlsx", index=False, sheet_name="Sheet1")
+            #final_df.to_excel("Data_parameter.xlsx", index=False, sheet_name="Sheet1")
             processed_data[list_column_name_insert_project].to_sql(f'{table_name}', 
                                                                 engine, 
                                                                 index=False, 
@@ -690,6 +690,7 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                 #print('Before: \n',before_check)
                 for i, j in zip(lst_cls, lst_dict):
                     data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)
+                #data.to_excel('output.xlsx', index=False, engine='openpyxl')
                 # after_check = data['Sub_Project_Type'].value_counts()
                 # print('After: \n',after_check)
                 if len(df_dict) == 0:
@@ -730,6 +731,7 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                             df_new_key_sa= pd.DataFrame()
                             df_new_key_sa = check_new_key_MainSector(df_new_key = df_new_key_sa, processed_data = processed_data, sector = sector)
                     elif sector == 'APT' or sector=='APARTMENT':
+                        data['Grade']= data['Grade'].fillna('Unrated')
                         df_temp_flat_apt = pd.DataFrame()
                         df_temp_flat_apt = pd.concat([df_temp_flat_apt, data], axis=0)
                         df_flat_apt = tracking_flat_file_MainSector(df_temp_flat_apt, file_url)
@@ -775,4 +777,4 @@ def main():
         importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
 
 if __name__ == "__main__":
-    main()
+    main() 

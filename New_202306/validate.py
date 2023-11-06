@@ -206,9 +206,9 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
     else:
         parameter_not_in_dict = data[f'{column_name}'][data[f'Convert_{parameter}'].isnull()]
     print(parameter_not_in_dict)
-   # print(parameter_not_in_dict_temp)
-    # print(data['Grade'])
-    #print(data)
+    if sector in ['HOTEL', 'OFFICE', 'APARTMENT'
+                      , 'APT', 'SA', 'SERVICED_APARTMENT']:
+        data['Grade']= data['Grade'].fillna('Unrated')
     if len(parameter_not_in_dict) != 0:
         temp_df = pd.DataFrame()
         parameter_not_in_dict = list(set(parameter_not_in_dict))
