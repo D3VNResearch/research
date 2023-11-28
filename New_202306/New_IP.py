@@ -84,6 +84,7 @@ def insert_to_fresh_IP(file_url, data, cnt_str):
                 pass
         data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')
 
+
 def check_duplicate_IP(data, column_name):
     unique_values = data['Date_Key'].unique()
     duplicate_dfs = []
@@ -161,8 +162,8 @@ def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ
                     data[i] = remove_unicode(data[i])
                 #Check dictionary
                 print('Start Check dictionary...')
-                lst_dict = ['City', 'District', 'Status', 'Sub_Type', 'Type']
-                lst_cls = ['City', 'District', 'Status', 'Project_Sub_Type', 'Project_Type']
+                lst_dict = ['City', 'District', 'Status', 'Sub_Type', 'Type', 'Developer']
+                lst_cls = ['City', 'District', 'Status', 'Project_Sub_Type', 'Project_Type', 'Developer_Name']
                 for i, j in zip(lst_cls, lst_dict):
                     print(f'Start checking dictionary of [{i}:{j}]...')
                     data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)
@@ -201,6 +202,8 @@ def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ
                     
                 else:
                     print(df_dict)
+                    df_noti_html = convert_df_to_html(type_html = 2, df = df_dict, type_sector = 2, cnxn = engine)
+                    run_email(type_sector = 'IP', email_type = 2, user_email = to_email, df_noti_html = df_noti_html)
                     print(colored('Validate failed','red'))
                     pass
 

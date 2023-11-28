@@ -4,6 +4,7 @@ from Connection import *
 def getListImportFile(list_url):
     url = []
     for i in list_url:
+        print('List url: ',i)
         sector = i.split('/')[-1].split('.')[0].upper()
         if sector not in ('x'):
             url.append(i)
@@ -22,7 +23,7 @@ def findFolder(list_folder,selected_sectors , url_hub):
     # Tạo DataFrame rỗng để lưu thông tin
     df_summ_file = pd.DataFrame({'Name':[],'ServerRelativeUrl':[], 'TimeLastModified':[], 'ModTime':[], 'Modified_by_ID':[]})
     for i in findFolderWithSector(list_folder, selected_sectors):
-        if i.split('/')[7] in selected_sectors:
+        if i.split('/')[8] in selected_sectors:
             df_summ_file = pd.concat([df_summ_file, ConnectSharePoint(url_hub).get_content_url(i)])
     # Tạo danh sách URL từ DataFrame
     list_url = df_summ_file['ServerRelativeUrl'].to_list()
@@ -36,12 +37,12 @@ def GetSector(input_string, list_folder ,selected_sectors):
     input_list = input_string.split(',')
     sector_list = []
     for i in list_folder:
-        sector_list.append(i.split('/')[7])
+        sector_list.append(i.split('/')[8])
     for input_sector in input_list:
         input_sector = input_sector.strip().lower()
         if input_sector == "-1":
             break
-
+        
         matched_sectors = [sector for sector in sector_list if input_sector in sector.lower()]
         if matched_sectors:
             selected_sectors.extend(matched_sectors)
@@ -60,6 +61,7 @@ def getFile(list_folder, selected_sectors, url_hub):
         print(colored(sector,'yellow'))
     list_url , df_summ_file = findFolder(list_folder, selected_sectors, url_hub)
     list_url = getListImportFile(list_url)
+    print(list_url)
     return list_url, df_summ_file
 
 def insert_to_fresh_MainSector(file_url, data, cnt_str):
@@ -731,7 +733,6 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                             df_new_key_sa= pd.DataFrame()
                             df_new_key_sa = check_new_key_MainSector(df_new_key = df_new_key_sa, processed_data = processed_data, sector = sector)
                     elif sector == 'APT' or sector=='APARTMENT':
-                        data['Grade']= data['Grade'].fillna('Unrated')
                         df_temp_flat_apt = pd.DataFrame()
                         df_temp_flat_apt = pd.concat([df_temp_flat_apt, data], axis=0)
                         df_flat_apt = tracking_flat_file_MainSector(df_temp_flat_apt, file_url)
@@ -768,7 +769,7 @@ def main():
     # set to_email
     selected_sectors = [] 
     while(True):
-        url_hub=f'/sites/BIHub/Shared Documents/Advisory Data/Main sector/Flat file'
+        url_hub=f'/sites/BIHub/Shared Documents/Advisory Data/Main sector/Flat file/Sector'
         Hub= ConnectSharePoint(url_hub)
         sp_object = url_hub.split('/')[2].replace('-','')
         list_folder = Hub.get_content_url(url_hub, return_list_folder=True)

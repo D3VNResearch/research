@@ -152,7 +152,7 @@ def remove_unicode(data):
 def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, cnxn, sp_object):
     lower_function = lambda x: x.strip().lower() if isinstance(x, str) else x
     if parameter in ['City', 'District', 'Status', 'Indicator'
-                     , 'Country', 'Industry'
+                     , 'Country', 'Industry', 'Developer'
                     ]:
         raw_parameter = pd.read_sql(f'select * from GENERAL.{parameter}_Dictionary',cnxn)
         raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
@@ -200,7 +200,7 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
     ## End - Hieu update - 31-05-2023
     #print(data[['Grade','Convert_Grade']])
     print('parameter: ', parameter)
-    if parameter == 'Grade' or parameter == 'Type' or parameter == 'Investment_Form':
+    if parameter == 'Grade' or parameter == 'Type' or parameter == 'Investment_Form' or parameter == 'Developer':
         temp = data[[f'{column_name}',f'Convert_{parameter}']].dropna()
         parameter_not_in_dict = temp[f'{column_name}'][temp[f'Convert_{parameter}'].isnull()]      
     else:
