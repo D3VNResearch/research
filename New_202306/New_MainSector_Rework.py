@@ -726,8 +726,8 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                         pass   
                     data[i] = remove_unicode(data[i])
                 # Check dictionary
-                lst_dict = ['City', 'District', 'Status', 'Grade', 'Type']
-                lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status', 'Grade', 'Sub_Project_Type']
+                lst_dict = ['City', 'District', 'Status', 'Grade', 'Type', 'Developer']
+                lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status', 'Grade', 'Sub_Project_Type', 'Developer']
                 # lst_dict = ['City', 'District', 'Status']
                 # lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status']
                 #print('Before: \n',before_check)

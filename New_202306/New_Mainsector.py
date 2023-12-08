@@ -685,8 +685,8 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                         pass   
                     data[i] = remove_unicode(data[i])
                 # Check dictionary
-                lst_dict = ['City', 'District', 'Status', 'Grade', 'Type']
-                lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status', 'Grade', 'Sub_Project_Type']
+                lst_dict = ['City', 'District', 'Status', 'Grade', 'Type', 'Developer']
+                lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status', 'Grade', 'Sub_Project_Type', 'Developer']
                 # lst_dict = ['City', 'District', 'Status']
                 # lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status']
                 #print('Before: \n',before_check)
@@ -754,12 +754,27 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                     print("Rows sau khi qua hàm get_project_key_MainSector: ",len(data))
                     
                     try:
-                        result = insert_to_fresh_MainSector(file_url, data, cnt_str)
+                        #result = insert_to_fresh_MainSector(file_url, data, cnt_str)
                         print(colored("insert_to_fresh SUCESSFUL!",'green'))
                     except Exception as e:
                         print(colored("insert_to_fresh FAILED:",str(e),'red'))
                 else:
-                    print(df_dict)
+                    #print(df_dict)
+                    columns = ['Sector', 'Raw_Developer', 'Cleaned_Developer','Last_Update']
+                    temp_df = pd.DataFrame(columns=columns)
+                    temp_df['Raw_Developer']=df_dict['Missing_Values']
+                    temp_df['Cleaned_Developer']=df_dict['Missing_Values']
+                    temp_df['Last_Update']= datetime.today().strftime('%Y-%m-%d')
+                    temp_df['Sector'] = sector
+                    existing_df = pd.read_excel("Missing_Dictionary.xlsx", sheet_name="Sheet1")
+
+                    # Concatenate the new data with the existing data
+                    final_df = pd.concat([existing_df, temp_df], ignore_index=True)
+
+                    # Save the concatenated DataFrame back to the Excel file
+                    final_df.to_excel("Missing_Dictionary.xlsx", index=False, sheet_name="Sheet1")
+                    # df_noti_html = convert_df_to_html(type_html = 2, df = df_dict, type_sector = 1, cnxn = engine)
+                    # run_email(type_sector = 'MAIN SECTOR', email_type = 2, user_email = to_email, df_noti_html = df_noti_html)
                     print(colored('Validate failed','red'))
                     pass
 

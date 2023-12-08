@@ -162,8 +162,8 @@ def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ
                     data[i] = remove_unicode(data[i])
                 #Check dictionary
                 print('Start Check dictionary...')
-                lst_dict = ['City', 'District', 'Status', 'Sub_Type', 'Type', 'Developer']
-                lst_cls = ['City', 'District', 'Status', 'Project_Sub_Type', 'Project_Type', 'Developer_Name']
+                lst_dict = ['City', 'District', 'Status', 'Sub_Type', 'Type']
+                lst_cls = ['City', 'District', 'Status', 'Project_Sub_Type', 'Project_Type']
                 for i, j in zip(lst_cls, lst_dict):
                     print(f'Start checking dictionary of [{i}:{j}]...')
                     data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)

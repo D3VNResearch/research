@@ -200,7 +200,11 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
     ## End - Hieu update - 31-05-2023
     #print(data[['Grade','Convert_Grade']])
     print('parameter: ', parameter)
-    if parameter == 'Grade' or parameter == 'Type' or parameter == 'Investment_Form' or parameter == 'Developer':
+    if sector in ['IP']:
+        data['Developer_Name']= data['Developer_Name'].fillna('No Information')
+    # if not data['Developer'].isnull().all():
+    #     data['Developer'] = data['Developer'].fillna('No Information')
+    if parameter == 'Grade' or parameter == 'Type' or parameter == 'Investment_Form':
         temp = data[[f'{column_name}',f'Convert_{parameter}']].dropna()
         parameter_not_in_dict = temp[f'{column_name}'][temp[f'Convert_{parameter}'].isnull()]      
     else:
@@ -209,6 +213,8 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
     if sector in ['HOTEL', 'OFFICE', 'APARTMENT'
                       , 'APT', 'SA', 'SERVICED_APARTMENT']:
         data['Grade']= data['Grade'].fillna('Unrated')
+        data['Developer'] = data['Developer'].fillna('No Information')
+
     if len(parameter_not_in_dict) != 0:
         temp_df = pd.DataFrame()
         parameter_not_in_dict = list(set(parameter_not_in_dict))

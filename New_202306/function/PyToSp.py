@@ -123,6 +123,49 @@ class SharePoint:
             pass
         
         return df
+    def get_file_with_sheet_name(self, file_url, sheet_name):
+        self.file_name = file_url.split('/')[-1]
+        response= File.open_binary(self.ctx, file_url)
+            # save data to BytesIO stream
+        self.bytes_file_obj = io.BytesIO()
+        self.bytes_file_obj.write(response.content)
+        self.bytes_file_obj.seek(0)  # set file object to start
+            # load Excel file from BytesIO stream
+        df = False
+        if self.file_name.split('.')[-1] == 'xlsx':
+            try:
+                df = pd.read_excel(self.bytes_file_obj, header=0, sheet_name=sheet_name)
+            except:
+                try:
+                    self.bytes_file_obj.seek(0)
+                    df = pd.read_excel(self.bytes_file_obj, header=0, sep=';')
+                except:
+                    try:
+                        self.bytes_file_obj.seek(0)
+                        df = pd.read_excel(self.bytes_file_obj, encoding='cp1252', header=0)
+                        print("Read xlsx with Encoding = cp1252 ...")
+                    except:
+                        print("Can not read {}".format(self.file_name))
+
+        elif self.file_name.split('.')[-1] == 'csv':
+            try:
+                df = pd.read_csv(self.bytes_file_obj, header=0, sheet_name= sheet_name)
+            except:
+                try:
+                    self.bytes_file_obj.seek(0)
+                    df = pd.read_csv(self.bytes_file_obj, header=0, sep=';')
+                except:
+                    try:
+                        self.bytes_file_obj.seek(0)
+                        df = pd.read_csv(self.bytes_file_obj, encoding='cp1252', header=0)
+                        print("Read csv with Encoding = cp1252 ...")
+                    except:
+                        print("Can not read {}".format(self.file_name))
+
+        else:
+            pass
+        
+        return df
     
     def upload_file(self, file_url, file_path):
         if platform.system() == 'window':
