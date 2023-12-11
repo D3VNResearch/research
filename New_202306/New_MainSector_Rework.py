@@ -801,6 +801,8 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                         print(colored("insert_to_fresh FAILED:",str(e),'red'))
                 else:
                     print(df_dict)
+                    df_noti_html = convert_df_to_html(type_html = 2, df = df_dict, type_sector = 2, cnxn = engine)
+                    run_email(type_sector = 'Main Sector', email_type = 2, user_email = to_email, df_noti_html = df_noti_html)
                     print(colored('Validate failed','red'))
                     pass
 
