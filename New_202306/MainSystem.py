@@ -33,7 +33,6 @@ class findFolder:
         df_summ_file = df_summ_file.reset_index(drop=True)
         return list_url, df_summ_file
 
-    
 class getData:
     def GetProvince(input_string, list_folder ,selected_provinces):  
         input_list = input_string.split(',')
@@ -132,6 +131,7 @@ def Send_Email_IP(to_email,df_flat_ip,df_new_key_ip, cnt_str):
         print(colored('Some new keys were created','yellow'))
         run_email(type_sector = 'IP', email_type = 4, user_email = to_email, df_noti_html = df_new_key_html)        
 
+        
 class importData:
     def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ_file, Hub):
         columns_that_need_unidecode=['Project_Name', 'Sub_Project_Name', 'Developer_Name'
@@ -318,7 +318,6 @@ class importData:
             lst_cls = ['City', 'District', 'Project_Name', 'Investor_Nationality', 'Industry_Lv1', 'Investment_Form']
             for i, j in zip(lst_cls, lst_dict):
                 data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)
-            print(df_dict)
             if len(df_dict) == 0:
                 print(colored('Validate succesfully','green'))
                 data = Generate_Additional_Columns(data,df_summ_file,Hub,engine,file_url)
@@ -326,7 +325,7 @@ class importData:
                 df_flat_fdi = tracking_flat_file(df_temp_flat_fdi, sector)
                 insert_to_fresh(file_url, data, cnt_str)
             else:
-                pass
+                df_dict.to_excel("Missing_Dictionary.xlsx", index=False, sheet_name="Sheet1")
 
     def importInfra(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub):
         '''Prepare ingredients'''

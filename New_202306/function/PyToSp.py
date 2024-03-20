@@ -24,8 +24,8 @@ def read_config_json(path, header):
         config = json.load(config_file)
         config = config[header]
     return config
-
 class SharePoint:
+    
     def __init__(self, config):
         self.context_auth = AuthenticationContext(config['url'])
         self.context_auth.acquire_token_for_app(client_id=config['client_id'], 

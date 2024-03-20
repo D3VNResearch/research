@@ -1,5 +1,6 @@
 from Connection import *
 
+
 # Hàm lọc danh sách URL xuất hiện dựa trên sector
 def getListImportFile(list_url):
     url = []
@@ -22,7 +23,7 @@ def findFolder(list_folder,selected_sectors , url_hub):
     # Tạo DataFrame rỗng để lưu thông tin
     df_summ_file = pd.DataFrame({'Name':[],'ServerRelativeUrl':[], 'TimeLastModified':[], 'ModTime':[], 'Modified_by_ID':[]})
     for i in findFolderWithSector(list_folder, selected_sectors):
-        if i.split('/')[8] in selected_sectors:
+        if i.split('/')[7] in selected_sectors:
             df_summ_file = pd.concat([df_summ_file, ConnectSharePoint(url_hub).get_content_url(i)])
     # Tạo danh sách URL từ DataFrame
     list_url = df_summ_file['ServerRelativeUrl'].to_list()
@@ -41,7 +42,6 @@ def GetSector(input_string, list_folder ,selected_sectors):
         input_sector = input_sector.strip().lower()
         if input_sector == "-1":
             break
-
         matched_sectors = [sector for sector in sector_list if input_sector in sector.lower()]
         if matched_sectors:
             selected_sectors.extend(matched_sectors)
@@ -52,32 +52,20 @@ def GetProvince(input_string, list_folder ,selected_provinces):
     input_list = input_string.split(',')
     province_list = []
     for i in list_folder:
-        province_list.append(i.split('/')[8])
+        province_list.append(i.split('/')[7])
     for input_province in input_list:
         input_province = input_province.strip().lower()
         if input_province == "-1":
             break
-
         matched_provinces = [province for province in province_list if input_province in province.lower()]
         if matched_provinces:
             selected_provinces.extend(matched_provinces)
         else:
             print(f"Không tìm thấy tỉnh chứa từ khóa '{input_province}'.")
     return selected_provinces 
-# def getFile(list_folder, selected_sectors, url_hub):
-#     input_string = input("Nhập tên sector muốn lấy: ")
-#     if input_string == 'APT':
-#         input_string = 'APARTMENT'
-#     elif input_string == 'SA':
-#         input_string = 'SERVICED_APARTMENT'
-#     print("Các sector đã chọn:")
-#     for sector in GetSector(input_string, list_folder ,selected_sectors):
-#         print(colored(sector,'yellow'))
-#     list_url , df_summ_file = findFolder(list_folder, selected_sectors, url_hub)
-#     list_url = getListImportFile(list_url)
-#     return list_url, df_summ_file
 
-def getFileMainSector(list_folder, selected_provinces, url_hub):
+
+def getFileProductMix(list_folder, selected_provinces, url_hub):
     url = []
     # Input provinces
     input_string = input("Nhập tên các tỉnh bạn muốn chọn, cách nhau bằng dấu phẩy (nhập -1 để thoát): ")
@@ -103,8 +91,8 @@ def getFileMainSector(list_folder, selected_provinces, url_hub):
     return url, df_summ_file
 
 
-def insert_to_fresh_MainSector(file_url, data, cnt_str):
-
+def insert_to_fresh_Product_Mix(file_url, data, cnt_str):
+    
     engine = create_engine(cnt_str)
     #Test Connection
     try:
@@ -116,32 +104,17 @@ def insert_to_fresh_MainSector(file_url, data, cnt_str):
     @event.listens_for(engine, 'before_cursor_execute')
     def receive_before_cursor_execute(conn, cursor, statement, params, context, executemany):
         file_name = file_url.split('/')[-1].split('.')[0]
-        print(f"Insert {sector} to Fresh.{sector}_New")
+        print(f"Insert {file_name} to Fresh.{sector}_New")
         if executemany:
             cursor.fast_executemany = True
     
     #-------------------------------------------------------
     print('Sector: ', sector)
     if sector=='APARTMENT' or sector=='APT':
-        table_name='APT_New'
-        for i in data.columns:
-            if i in ['Area_GFA_Max','Area_GFA_Min']:
-                old_names = ['Area_NFA_Max', 'Area_NFA_Min', 'Area_GFA_Max', 'Area_GFA_Min',
-                            'NFA_Primary_Price', 'CFA_Primary_Price', 'NFA_Secondary_Price', 'CFA_Secondary_Price'
-                            ]
-                new_names = ['Area_NSA_Max', 'Area_NSA_Min', 'Area_NFA_Max', 'Area_NFA_Min',
-                            'NSA_Primary_Price', 'NFA_Primary_Price', 'NSA_Secondary_Price', 'NFA_Secondary_Price'
-                            ]
-                data.rename(columns=dict(zip(old_names, new_names)), inplace=True)
-                break
-            else:
-                pass
-        list_float_columns = ['Land_Area', 'Min_Size_Area', 'Max_Size_Area', 'Latitude', 'Longtitude', 
-                             'Secondary_Supply', 'Total_Supply', 'Newly_Launch', 'Total_Launched_Units', 'Available_Units', 
-                             'Total_Sold_Units', 'Sold_Units_End_Of_Q', 'Quarterly_Sales', 'Area_NSA_Max', 'Area_NSA_Min', 
-                             'Area_NFA_Max', 'Area_NFA_Min', 'NSA_Primary_Price', 'NFA_Primary_Price',
-                             'NSA_Secondary_Price', 'NFA_Secondary_Price', 'Quarterly_Sales_New_Supply', 
-                             'Remaining_Supply', 'Avg_Asking_Rent', 'Avg_Unit_Rent'
+        table_name='Product_Mix_New'
+        list_float_columns = ['LA', 'GFA', 'Balcony_GFA', 'Pool_GFA', 'Garden_GFA', 
+                             'Discount', 'Incentive', 'Rent', 'Primary_Price_LA', 'Primary_Price_GFA', 
+                              'Secondary_Price_LA', 'Secondary_Price_GFA'
                              ]     
         for i in list_float_columns:
             if i not in data.columns:
@@ -153,12 +126,10 @@ def insert_to_fresh_MainSector(file_url, data, cnt_str):
         data.to_excel('output.xlsx', index=False, engine='openpyxl')
         data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')
     elif sector=='VLTH':
-        table_name='VLTH_New'
-        list_float_columns = ['Land_Area', 'Latitude', 'Longtitude', 'Total_Supply', 'Newly_Launch', 
-                             'Total_Launched_Units', 'Available_Units', 'Total_Sold_Units', 'Sold_Units_End_Of_Q', 
-                             'Quarterly_Sales', 'Remaining_Supply', 'LA_Primary_Price', 'UNIT_Primary_Price', 
-                             'LA_Secondary_Price', 'UNIT_Secondary_Price', 'Quarterly_Sales_New_Supply'
-                             ]
+        table_name='Product_Mix_New'
+        list_float_columns = ['LA', 'GFA', 'Balcony_GFA', 'Pool_GFA', 'Garden_GFA', 
+                             'Discount', 'Incentive', 'Rent', 'Primary_Price_LA', 'Primary_Price_GFA', 
+                              'Secondary_Price_LA', 'Secondary_Price_GFA']
         for i in list_float_columns:
             if i not in data.columns:
                 data[i] = np.nan
@@ -166,77 +137,6 @@ def insert_to_fresh_MainSector(file_url, data, cnt_str):
                 pass
             data[i]=data[i].apply(convert_float).replace(r'\.0$','', regex=True)   
         data = data.replace({np.nan: None})
-        
-        data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')
-
-    elif sector=='RETAIL':
-        table_name='RETAIL_New'
-        list_float_columns = ['Longtitude','Latitude','Service_Charge','Avg_Gross_Rent','Leased_Area',
-                             'Vacant_Area','NLA','GFA','Number_Of_Floors','New_Supply'
-                             ]
-        for i in list_float_columns:
-            if i not in data.columns:
-                data[i] = np.nan
-            else:
-                pass
-            data[i]=data[i].apply(convert_float).replace(r'\.0$','', regex=True)
-        data = data.replace({np.nan: None})
-        data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')
-        
-    elif sector=='OFFICE':
-        table_name='OFFICE_New'
-        list_float_columns=['Longtitude','Latitude', 'Gross_Office_Area', 'Efficiency', 'NLA',
-                           'Leased_Area_End_Of_Q', 'Vacant_Area', 'Average_Price',
-                           'Avg_Gross_Rent', 'Avg_Net_Rent','New_Supply'
-                           ]
-        for i in list_float_columns:
-            if i not in data.columns: 
-                data[i] = np.nan
-            else:
-                pass
-            data[i]=data[i].apply(convert_float).replace(r'\.0$','', regex=True)    
-        data = data.replace({np.nan: None})
-        data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')        
-            
-    elif sector=='HOTEL':
-        table_name='HOTEL_New'
-        data.rename(columns = {'Project_Type':'Sub_Project_Type'}, inplace = True)
-        list_float_columns=['Longtitude','Latitude', 'Land_Area', 'Occupancy','Total_Supply',
-                            'Leased_Rooms','Avg_Room_Price', 'Service_Charge', 'Quoted_Room_Rate', 'New_Supply'
-                           ]
-        for i in list_float_columns:
-            if i not in data.columns:
-                data[i] = np.nan
-            else:
-                pass
-            data[i]=data[i].apply(convert_float).replace(r'\.0$','', regex=True) 
-        data = data.replace({np.nan: None})
-        data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')
-        
-    elif sector=='SERVICED_APARTMENT' or sector=='SA':
-        table_name='Serviced_Apartment_New'
-        for i in data.columns:
-            if i in ['Rev_PAR']:
-                old_names = ['Rev_PAR'
-                            ]
-                new_names = ['Rev_PAU'
-                            ]
-                data.rename(columns=dict(zip(old_names, new_names)), inplace=True)
-                break
-            else:
-                pass
-        list_float_columns=['Latitude', 'Longtitude', 'Total_Supply', 'Launch_Units', 'Leased_Units', 
-                            'Net_Lettable', 'Rev_PAU', 'Rev_PAU_m2','Avg_Rent', 'Rent_Per_Unit', 
-                            'Avg_Unit_Size', 'New_Supply','Vacant_Units'
-                           ]
-        for i in list_float_columns:
-            if i not in data.columns:
-                data[i] = np.nan
-            else:
-                pass
-            data[i]=data[i].apply(convert_float).replace(r'\.0$','', regex=True)   
-        data = data.replace({np.nan: None})
-
         data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')
 
 def check_duplicate_MainSector(data, column_name):
@@ -258,7 +158,7 @@ def check_duplicate_MainSector(data, column_name):
     return data, df_dup  # Return both data and df_dup
 
 
-def get_data_MainSector(relative_url, file_url):
+def get_data_PM(relative_url, file_url):
     header_BIHub = 'share_point_BIHub'
     config_BIHub = read_config_json(config_path, header_BIHub)
     BIHub = SharePoint(config_BIHub)
@@ -278,7 +178,7 @@ def get_data_MainSector(relative_url, file_url):
 
     return data, file_name, sector
 
-def Send_Email_MainSector(to_email,df_flat_ip,df_new_key_ip, cnt_str):
+def Send_Email_PM(to_email,df_flat_ip,df_new_key_ip, cnt_str):
     list_df_flat = [df_flat_ip]
     list_df_new_key = [df_new_key_ip]
     engine = create_engine(cnt_str)
@@ -293,7 +193,7 @@ def Send_Email_MainSector(to_email,df_flat_ip,df_new_key_ip, cnt_str):
         print(colored('Some new keys were created','yellow'))
         run_email(type_sector = 'Main Sector', email_type = 4, user_email = to_email, df_noti_html = df_new_key_html)    
 
-def check_project_key_MainSector(file_url, data, sector, engine):
+def check_project_key_PM(file_url, data, sector, engine):
     flag_key=0
     if 'Project_Key' not in data.columns:
         data['Project_Key'] = np.nan
@@ -302,13 +202,12 @@ def check_project_key_MainSector(file_url, data, sector, engine):
         pass
     
     if sector in ['VLTH', 'RETAIL']:
-        list_keys = ['Sector', 'Sub_Project_Name', 'Project_District_Name','Project_City_Name','Project_Type','Project_Key']
-        list_keys_on =['Sector', 'Sub_Project_Name','Project_District_Name','Project_City_Name','Project_Type']
+        list_keys = ['Sector', 'Sub_Project_Name', 'Project_District_Name','Project_City_Name','Project_Key']
+        list_keys_on =['Sector', 'Sub_Project_Name','Project_District_Name','Project_City_Name']
 
     elif sector in ['OFFICE','APT','APARTMENT','HOTEL','SA','SERVICED_APARTMENT']:
         list_keys=['Sector', 'Sub_Project_Name', 'Project_District_Name','Project_City_Name','Project_Grade','Project_Key']
         list_keys_on=['Sector', 'Sub_Project_Name','Project_District_Name','Project_City_Name','Project_Grade']
-
     if sector != 'IP':
         table_name = 'Main_Sector_Project' 
     else:
@@ -350,23 +249,22 @@ def check_project_key_MainSector(file_url, data, sector, engine):
         print(colored('Unknown sector in check project key section','yellow'))
         return processed_data, flag_key
 
-def check_new_key_MainSector(df_new_key = None, processed_data = None, sector = None):
+def check_new_key_PM(df_new_key = None, processed_data = None, sector = None):
     if sector in ['VLTH', 'RETAIL']:
         list_keys_on = ['Sector', 'Sub_Project_Name','Project_District_Name'
-                        ,'Project_City_Name','Sub_Project_Type'
+                        ,'Project_City_Name'
                        ]
         list_dim_columns = ['Sector', 'Project_City_Name', 'Date_Key', 'Project_District_Name'
-                            , 'Project_Name', 'Sub_Project_Name', 'Sub_Project_Type', 'Project_Status', 'Developer', 'Launch_Year'
+                            , 'Project_Name', 'Sub_Project_Name'
                            ]
-        processed_data = processed_data.rename(columns = {'Project_Type':'Sub_Project_Type', 'Current_Status':'Project_Status'})
     elif sector in ['OFFICE','APT','APARTMENT','HOTEL','SA','SERVICED_APARTMENT']:
         list_keys_on = ['Sector', 'Sub_Project_Name','Project_District_Name'
                         , 'Project_City_Name','Project_Grade'
                        ]
         list_dim_columns = ['Sector', 'Project_City_Name', 'Date_Key', 'Project_District_Name'
-                            , 'Project_Name', 'Sub_Project_Name', 'Project_Grade', 'Project_Status', 'Developer', 'Launch_Year'
+                            , 'Project_Name', 'Sub_Project_Name', 'Project_Grade'
                            ]
-        processed_data = processed_data.rename(columns = {'Grade':'Project_Grade', 'Current_Status':'Project_Status'})
+        processed_data = processed_data.rename(columns = {'Grade':'Project_Grade'})
         
     else:
         print("check new key Main Sector : ", sector)
@@ -385,7 +283,7 @@ def check_new_key_MainSector(df_new_key = None, processed_data = None, sector = 
     
     return df_new_key
 
-def tracking_flat_file_MainSector(data, file_url):
+def tracking_flat_file_PM(data, file_url):
     sector = file_url.split('/')[-1].split('.')[0].split('_')[0].upper()
 
     if sector in ['RETAIL', 'OFFICE', 'HOTEL', 'SA', 'SERVICED_APARTMENT', 'APARTMENT', 'APT', 'VLTH', 'PM']:
@@ -416,20 +314,18 @@ def tracking_flat_file_MainSector(data, file_url):
                        , 'Total_Supply', 'Leased_Units', 'New_Supply', 'File_Name'
                       ]
     elif sector == 'APT' or sector == 'APARTMENT':
-        list_columns_sum = ['Total_Launched_Units', 'Total_Sold_Units', 'Available_Units', 'Quarterly_Sales']
-        re_position = ['Sector', 'Project_City_Name', 'Date_Key', 'Num_Record'
-                       , 'Total_Launched_Units', 'Total_Sold_Units', 'Available_Units', 'Quarterly_Sales', 'File_Name'
+        list_columns_sum =[]
+        re_position = ['Sector', 'Project_City_Name', 'Date_Key', 'File_Name'
                       ]
     elif sector == 'VLTH':
-        list_columns_sum = ['Total_Launched_Units', 'Total_Sold_Units', 'Available_Units', 'Quarterly_Sales']
-        re_position = ['Sector', 'Project_City_Name', 'Date_Key', 'Num_Record'
-                       , 'Total_Launched_Units', 'Total_Sold_Units', 'Available_Units', 'Quarterly_Sales', 'File_Name'
+        list_columns_sum =[]
+        re_position = ['Sector', 'Project_City_Name', 'Date_Key', 'File_Name'
                       ]
     else:
         print("tracking_flat_file_MainSector: ",sector)
         return print(colored('Unknown sector from tracking_flat_file_MainSector','yellow'))
     
-    if sector not in ['IP', 'MACRO', 'FDI', 'INFRA', 'PM', 'TENANT']:
+    if sector not in ['IP', 'MACRO', 'FDI', 'INFRA', 'TENANT']:
         list_columns_name = list(merge(list_columns_groupby, list_columns_sum))
         df_flat = pd.DataFrame(columns=list_columns_name)
         for i in list_columns_sum:
@@ -464,29 +360,29 @@ def tracking_flat_file_MainSector(data, file_url):
         df_flat = df_flat.sort_values(by =['File_Name'],ascending=True, ignore_index=False)
         return df_flat   
 
-def get_project_key_MainSector(flag_key, processed_data, data, sector, engine):
+def get_project_key_PM(flag_key, processed_data, data, sector, engine):
     if sector in ['VLTH', 'RETAIL']:
-        list_keys = ['Sector', 'Sub_Project_Name', 'Project_District_Name','Project_City_Name','Project_Type','Project_Key']
-        list_keys_on =['Sector', 'Sub_Project_Name','Project_District_Name','Project_City_Name','Project_Type']
-        if sector == 'VLTH':
-            if 'Brand' in data.columns:
-                list_column_name_insert_project =['Sector','Project_Name','Sub_Project_Name','Latitude','Longtitude'
-                                                  ,'Project_Type','Current_Status','Project_Phase','Project_City_Name'
-                                                  ,'Project_District_Name','Developer','Date_Key','File_Date'
-                                                  ,'Import_Date', 'Brand'
-                                                 ]
-            else:
-                list_column_name_insert_project =['Sector','Project_Name','Sub_Project_Name','Latitude','Longtitude'
-                                                  ,'Project_Type','Current_Status','Project_Phase','Project_City_Name'
-                                                  ,'Project_District_Name','Developer','Date_Key','File_Date'
-                                                  ,'Import_Date'
-                                                 ]
-        else:
-            list_column_name_insert_project =['Sector','Project_Name','Sub_Project_Name','Latitude','Longtitude'
-                                              ,'Project_Type','Current_Status','Project_Phase','Project_City_Name'
-                                              ,'Project_District_Name','Developer','Date_Key','File_Date'
-                                              ,'Import_Date'
-                                             ]
+        list_keys = ['Sector', 'Sub_Project_Name', 'Project_District_Name','Project_City_Name','Project_Key']
+        list_keys_on =['Sector', 'Sub_Project_Name','Project_District_Name','Project_City_Name']
+        # if sector == 'VLTH':
+        #     if 'Brand' in data.columns:
+        #         list_column_name_insert_project =['Sector','Project_Name','Sub_Project_Name','Latitude','Longtitude'
+        #                                           ,'Project_Type','Current_Status','Project_Phase','Project_City_Name'
+        #                                           ,'Project_District_Name','Developer','Date_Key','File_Date'
+        #                                           ,'Import_Date', 'Brand'
+        #                                          ]
+        #     else:
+        #         list_column_name_insert_project =['Sector','Project_Name','Sub_Project_Name','Latitude','Longtitude'
+        #                                           ,'Project_Type','Current_Status','Project_Phase','Project_City_Name'
+        #                                           ,'Project_District_Name','Developer','Date_Key','File_Date'
+        #                                           ,'Import_Date'
+        #                                          ]
+        # else:
+        #     list_column_name_insert_project =['Sector','Project_Name','Sub_Project_Name','Latitude','Longtitude'
+        #                                       ,'Project_Type','Current_Status','Project_Phase','Project_City_Name'
+        #                                       ,'Project_District_Name','Developer','Date_Key','File_Date'
+        #                                       ,'Import_Date'
+        #                                      ]
             
     elif sector in ['OFFICE','APT','APARTMENT']:
         list_keys=['Sector', 'Sub_Project_Name', 'Project_District_Name','Project_City_Name','Project_Grade','Project_Key']
@@ -527,21 +423,13 @@ def get_project_key_MainSector(flag_key, processed_data, data, sector, engine):
         else:
             processed_data['File_Date'] = pd.to_datetime(processed_data['File_Date']).dt.date
         #------------------------------------------------------- 
-        if sector in ['VLTH', 'RETAIL']:
-            processed_data = processed_data.rename(columns={'Sub_Project_Type':'Project_Type', 'Project_Status':'Current_Status'})
-        elif sector in ['OFFICE','APT','APARTMENT','HOTEL','SA','SERVICED_APARTMENT']:
-            if sector in ['OFFICE', 'APT', 'APARTMENT']:
-                processed_data = processed_data.rename(columns={'Sub_Project_Type':'Project_Type'})
-            else:
-                pass
-            processed_data = processed_data.rename(columns={'Grade':'Project_Grade', 'Project_Status':'Current_Status'})    
+        processed_data = processed_data.rename(columns={'Grade':'Project_Grade', 'Project_Status':'Current_Status'})    
         for i in list_keys_on:
             processed_data[i]=processed_data[i].str.title()
         if sector != 'IP':
             processed_data['Sector'] = processed_data['Sector'].str.upper()
         else:
             pass
-        print(colored("List new_key:",'yellow'),len(processed_data[list_column_name_insert_project]))
         # df_data = pd.DataFrame(processed_data)
         # # Read the existing Excel file into a DataFrame
         # existing_df = pd.read_excel("Data_parameter.xlsx", sheet_name="Sheet1")
@@ -549,63 +437,14 @@ def get_project_key_MainSector(flag_key, processed_data, data, sector, engine):
         # final_df = pd.concat([existing_df, df_data], ignore_index=True)
         # # Save the concatenated DataFrame back to the Excel file
         # final_df.to_excel("Data_parameter.xlsx", index=False, sheet_name="Sheet1")
-        print("Before get_project_key: ",len(data))
         #-------------------------------------------------------     
-        if sector == 'RETAIL' or sector == 'VLTH':
-            processed_data[list_column_name_insert_project] = processed_data[list_column_name_insert_project].drop_duplicates(subset=['Sector', 'Sub_Project_Name','Project_District_Name','Project_City_Name','Project_Type'])
-            df_data = pd.DataFrame(processed_data[list_column_name_insert_project])
-            # Read the existing Excel file into a DataFrame
-            # existing_df = pd.read_excel("Data_parameter.xlsx", sheet_name="Sheet1")
-            # # Concatenate the new data with the existing dat
-            # final_df = pd.concat([existing_df, df_data], ignore_index=True)
-            # # Save the concatenated DataFrame back to the Excel file
-            # final_df.to_excel("Data_parameter.xlsx", index=False, sheet_name="Sheet1")
-            processed_data[list_column_name_insert_project].to_sql(f'{table_name}', 
-                                                                engine, 
-                                                                index=False, 
-                                                                if_exists='append', 
-                                                                schema='FRESH'
-                                                          )
-            delete_query = '''
-                            DELETE FROM fresh.Main_Sector_Project
-                            WHERE date_key IS NULL
-                            '''
-            engine.execute(text(delete_query))
-        elif sector in ['HOTEL','SA','SERVICED_APARTMENT','OFFICE','APT','APARTMENT']:
-            processed_data[list_column_name_insert_project] = processed_data[list_column_name_insert_project].drop_duplicates(subset=['Sector', 'Sub_Project_Name','Project_District_Name','Project_City_Name','Project_Grade'])
-            df_data = pd.DataFrame(processed_data[list_column_name_insert_project])
-            # Read the existing Excel file into a DataFrame
-            # existing_df = pd.read_excel("Data_parameter.xlsx", sheet_name="Sheet1")
-            # # Concatenate the new data with the existing dat
-            # final_df = pd.concat([existing_df, df_data], ignore_index=True)
-            # Save the concatenated DataFrame back to the Excel file
-            #final_df.to_excel("Data_parameter.xlsx", index=False, sheet_name="Sheet1")
-            processed_data[list_column_name_insert_project].to_sql(f'{table_name}', 
-                                                                engine, 
-                                                                index=False, 
-                                                                if_exists='append', 
-                                                                schema='FRESH'
-                                                          )
-            delete_query = '''
-                            DELETE FROM fresh.Main_Sector_Project
-                            WHERE date_key IS NULL
-                            '''
-            engine.execute(text(delete_query))
-        #Get key
-        if sector in ['VLTH', 'RETAIL']:
-            data = data.rename(columns = {'Sub_Project_Type':'Project_Type'})
-        elif sector in ['OFFICE','APT','APARTMENT'
+
+        if sector in ['OFFICE','APT','APARTMENT'
                         ,'HOTEL','SA','SERVICED_APARTMENT'
                        ]:
             data = data.rename(columns = {'Grade':'Project_Grade'})    
         #-------------------------------------------------------    
-        if sector == 'VLTH':
-            if 'Branded_Flag' in data.columns:
-                df_query = pd.read_sql(f"select * from FRESH.{table_name} WHERE Branded_Flag = 1",engine)
-            else:
-                df_query = pd.read_sql(f"select * from FRESH.{table_name}",engine)
-        else:
-            df_query = pd.read_sql(f"select * from FRESH.{table_name}",engine)
+        df_query = pd.read_sql(f"select * from DW.{table_name}",engine)
         data[list_keys_on] = data[list_keys_on].applymap(lower_function)
         df_query[list_keys] = df_query[list_keys].applymap(lower_function)
         data = pd.merge(data, df_query[list_keys],
@@ -626,10 +465,14 @@ def get_project_key_MainSector(flag_key, processed_data, data, sector, engine):
                        ]:
             data.rename(columns = {'Project_Key_y':'Project_Key','Project_Grade':'Grade'}, inplace = True)
             data['Sector']=data['Sector'].str.upper()
+        elif sector in ['Product_Mix', 'PM']:
+            data.rename(columns = {'Project_Key_y':'Project_Key'}, inplace = True)
+            data['Sector']=data['Sector'].str.upper()
+            data['File_Date'] = pd.to_datetime(data['File_Date']).dt.date
         else:
             data.rename(columns = {'Project_Key_y':'Project_Key'}, inplace = True)
             data['File_Date'] = pd.to_datetime(data['File_Date']).dt.date
-        return data
+        print('New key: ', data)
         #-------------------------------------------------------
     #Get key
     elif flag_key==0:
@@ -640,13 +483,8 @@ def get_project_key_MainSector(flag_key, processed_data, data, sector, engine):
                        ]:
             data = data.rename(columns = {'Grade':'Project_Grade'})    
         #-------------------------------------------------------    
-        if sector == 'VLTH':
-            if 'Branded_Flag' in data.columns:
-                df_query = pd.read_sql(f"select * from FRESH.{table_name} WHERE Branded_Flag = 1",engine)
-            else:
-                df_query = pd.read_sql(f"select * from FRESH.{table_name}",engine)
-        else:
-            df_query = pd.read_sql(f"select * from FRESH.{table_name}",engine)
+
+        df_query = pd.read_sql(f"select * from DW.{table_name}",engine)
         data[list_keys_on] = data[list_keys_on].applymap(lower_function)
         df_query[list_keys] = df_query[list_keys].applymap(lower_function)
         data = pd.merge(data, df_query[list_keys],
@@ -677,12 +515,107 @@ def get_project_key_MainSector(flag_key, processed_data, data, sector, engine):
         print(colored('Unknown sector in get key section','yellow'))
         return data
 
+def check_dictionary_PM(df_dict, file_name, data, column_name, parameter, sector, cnxn, sp_object):
+    lower_function = lambda x: x.strip().lower() if isinstance(x, str) else x
+    if parameter in ['City', 'District', 'Status', 'Indicator'
+                     , 'Country', 'Industry'
+                    ]:
+        raw_parameter = pd.read_sql(f'select * from GENERAL.{parameter}_Dictionary',cnxn)
+        raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
+    elif parameter == 'Grade':
+        if sector in ['HOTEL', 'OFFICE', 'APARTMENT'
+                      , 'APT', 'SA', 'SERVICED_APARTMENT'
+                     ]:
+            raw_parameter = pd.read_sql(f"select * from GENERAL.Project_{parameter}_Dictionary",cnxn)
+            raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
+        else:
+            return data, df_dict
+    elif parameter in ['Type', 'Sub_Type']:
+        if sector in ['RETAIL', 'VLTH', 'APARTMENT'
+                      , 'APT', 'IP', 'TENANT'
+                     ]:
+            if sector == 'APT':
+                sector = 'APARTMENT'
+            raw_parameter = pd.read_sql(f"select * from GENERAL.Project_{parameter}_Dictionary WHERE Sector = '{sector}' ",cnxn)
+            raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
+        else:
+            return data, df_dict
+    elif parameter in ['Project_Name', 'Investor_Nationality', 'Industry_Lv1', 'Investment_Form'
+                      , 'Infrastructure_Level_1', 'Infrastructure_Level_2'
+                      ]:
+        if sector in ['FDI', 'INFRA']:
+            header_BIHub = 'share_point_BIHub'
+            config_BIHub = read_config_json(config_path, header_BIHub)
+            BIHub = SharePoint(config_BIHub)
+            raw_parameter = eval(sp_object).get_file(f'/sites/BIHub/Shared Documents/Advisory Data/{sector}/Mapping/{parameter}_Dictionary.xlsx')
+            raw_parameter[f'Raw_{parameter}'] = remove_unicode(raw_parameter[f'Raw_{parameter}']).apply(lower_function)
+            raw_parameter = raw_parameter.drop_duplicates(subset=[f'Raw_{parameter}'], keep='last')
+        else:
+            return data, df_dict
+    elif parameter in ['Developer']:
+        if sector in ['RETAIL', 'VLTH', 'APARTMENT'
+                      , 'APT', 'HOTEL', 'SA', 'SERVICED_APARTMENT', 'OFFICE']:
+            raw_parameter = pd.read_sql(f"select * from GENERAL.{parameter}_Dictionary WHERE Sector = 'Main Sector' ",cnxn)
+            raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
+        elif sector in ['IP']:
+            raw_parameter = pd.read_sql(f"select * from GENERAL.{parameter}_Dictionary WHERE Sector = 'Ip' ",cnxn)
+            raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
+        else:
+            return data, df_dict
+    else:
+        print(colored('Unknown parameter in check dictionary section','yellow'))
+        return data, df_dict 
+    #print('Before: ',data['Grade'])
+    data[f'{column_name}']= data[f'{column_name}'].apply(lower_function)
 
-def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub):
+    # data[f'Convert_{parameter}'] = pd.merge(data, raw_parameter
+    #                                         , how='left'
+    #                                         , left_on=f'{column_name}'
+    #                                         , right_on=f'Raw_{parameter}')[f'Cleaned_{parameter}']
+    # Hieu update - 31-05-2023
+    #get_cleaned_type = lambda x: raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x,f'Cleaned_{parameter}'].values[0] #fix lỗi duplicate của hàm merge trên\
+    get_cleaned_type = lambda x: raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x, f'Cleaned_{parameter}'].values[0] if len(raw_parameter.loc[raw_parameter[f'Raw_{parameter}'] == x, f'Cleaned_{parameter}']) > 0 else None
+    data[f'Convert_{parameter}'] = data[f'{column_name}'].map(get_cleaned_type)
+    ## End - Hieu update - 31-05-2023
+    #print(data[['Grade','Convert_Grade']])
+    print('parameter: ', parameter)
+    if sector in ['IP']:
+        data['Developer_Name']= data['Developer_Name'].fillna('No Information')
+    if sector in ['FDI']:
+        data['District']= data['District'].fillna('No Information')
+    # if not data['Developer'].isnull().all():
+    #     data['Developer'] = data['Developer'].fillna('No Information')
+
+    if parameter == 'Grade' or parameter == 'Type' or parameter == 'Investment_Form':
+        temp = data[[f'{column_name}',f'Convert_{parameter}']].dropna()
+        parameter_not_in_dict = temp[f'{column_name}'][temp[f'Convert_{parameter}'].isnull()]      
+    else:
+        parameter_not_in_dict = data[f'{column_name}'][data[f'Convert_{parameter}'].isnull()]
+
+    print(parameter_not_in_dict)
+    if sector in ['PM']:
+        data['Grade']= data['Grade'].fillna('Unrated')
+    if len(parameter_not_in_dict) != 0:
+        temp_df = pd.DataFrame()
+        parameter_not_in_dict = list(set(parameter_not_in_dict))
+        temp_df.insert(loc=0, column = 'Missing_Values', value = parameter_not_in_dict)
+        temp_df.insert(loc=0, column = 'File_Name', value = f'{file_name}')
+        temp_df.insert(loc=0, column = 'Flag', value = f'{parameter}')
+        df_dict = pd.concat([df_dict, temp_df], axis=0)
+        return data, df_dict
+    else:
+        if parameter == 'Project_Name':
+            data[f'{column_name}'] = data[f'{column_name}'].str.title()
+            data[f'Convert_{parameter}'] = data[f'Convert_{parameter}'].str.title()
+            data.rename(columns = {f'Convert_{parameter}':f'{parameter}_Eng'}, inplace = True)
+        else:
+            data[f'{column_name}'] = data[f'Convert_{parameter}']
+            data = data.drop(columns = [f'Convert_{parameter}'])
+
+        return data, df_dict
+def importProduct_Mix(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub):
         '''Prepare ingredients''' 
-        columns_that_need_unidecode = ['Project_Name','Sub_Project_Name','Developer','Constructor'
-                                    , 'Operator','Project_District_Name','Project_City_Name', 'Construction_Status'
-                                    ]
+        columns_that_need_unidecode = ['Project_Name','Sub_Project_Name','Project_District_Name','Project_City_Name']
         engine = create_engine(cnt_str)
         #Create empty df for checking dictionary
         df_dict = pd.DataFrame(columns=['File_Name', 'Missing_Values', 'Flag'])
@@ -696,7 +629,7 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
         #-------------------------------------------------------
         '''Get data''' 
         for file_url in tqdm(list_url):  
-            data, file_name, sector = get_data_MainSector(url_hub, file_url)
+            data, file_name, sector = get_data_PM( url_hub, file_url)
             print('Sector: ', sector)
             print("\nRows ban đầu từ flat file:  ",len(data))
             #-------------------------------------------------------
@@ -727,13 +660,13 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                         pass   
                     data[i] = remove_unicode(data[i])
                 # Check dictionary
-                lst_dict = ['City', 'District', 'Status', 'Grade', 'Type','Developer']
-                lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status', 'Grade', 'Sub_Project_Type','Developer']
+                lst_dict = ['City', 'District', 'Grade']
+                lst_cls = ['Project_City_Name', 'Project_District_Name', 'Grade']
                 # lst_dict = ['City', 'District', 'Status']
                 # lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status']
                 #print('Before: \n',before_check)
                 for i, j in zip(lst_cls, lst_dict):
-                    data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)
+                    data, df_dict = check_dictionary_PM(df_dict, file_name, data, i, j, sector, engine, sp_object)
                 #data.to_excel('output.xlsx', index=False, engine='openpyxl')
                 # after_check = data['Sub_Project_Type'].value_counts()
                 # print('After: \n',after_check)
@@ -743,61 +676,34 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                     '''Import data process'''
                     #Check project key
                     data = Generate_Additional_Columns(data,df_summ_file,Hub,engine,file_url)
-                    processed_data, flag_key = check_project_key_MainSector(file_url, data, sector, engine)
+                    processed_data, flag_key = check_project_key_PM(file_url, data, sector, engine)
                     print("Rows sau khi check project key: ",len(data))
                     #Create tracking audit
-                    if sector == 'RETAIL':
-                        df_temp_flat_retail = pd.DataFrame()
-                        df_temp_flat_retail = pd.concat([df_temp_flat_retail, data], axis=0)
-                        df_flat_retail=tracking_flat_file_MainSector(df_temp_flat_retail, file_url)
-                        if len(processed_data) != 0:
-                            df_new_key_retail= pd.DataFrame()
-                            df_new_key_retail = check_new_key_MainSector(df_new_key = df_new_key_retail, processed_data = processed_data, sector = sector)
-                    elif sector == 'OFFICE':
-                        df_temp_flat_office = pd.DataFrame()
-                        df_temp_flat_office = pd.concat([df_temp_flat_office, data], axis=0)
-                        df_flat_office = tracking_flat_file_MainSector(df_temp_flat_office, file_url)
-                        if len(processed_data) != 0:
-                            df_new_key_office= pd.DataFrame()
-                            df_new_key_office = check_new_key_MainSector(df_new_key = df_new_key_office, processed_data = processed_data, sector = sector)
-                    elif sector == 'HOTEL':
-                        df_temp_flat_hotel = pd.DataFrame()
-                        df_temp_flat_hotel = pd.concat([df_temp_flat_hotel, data], axis=0)
-                        df_flat_hotel = tracking_flat_file_MainSector(df_temp_flat_hotel, file_url)
-                        if len(processed_data) != 0:
-                            df_new_key_hotel= pd.DataFrame()
-                            df_new_key_hotel = check_new_key_MainSector(df_new_key = df_new_key_hotel, processed_data = processed_data, sector = sector)
-                    elif sector == 'SA' or sector=='SERVICED_APARTMENT':
-                        df_temp_flat_sa = pd.DataFrame()
-                        df_temp_flat_sa = pd.concat([df_temp_flat_sa, data], axis=0)
-                        df_flat_sa = tracking_flat_file_MainSector(df_temp_flat_sa, file_url)
-                        if len(processed_data) != 0:
-                            df_new_key_sa= pd.DataFrame()
-                            df_new_key_sa = check_new_key_MainSector(df_new_key = df_new_key_sa, processed_data = processed_data, sector = sector)
-                    elif sector == 'APT' or sector=='APARTMENT':
+                    if sector == 'APT' or sector=='APARTMENT':
                         df_temp_flat_apt = pd.DataFrame()
                         df_temp_flat_apt = pd.concat([df_temp_flat_apt, data], axis=0)
-                        df_flat_apt = tracking_flat_file_MainSector(df_temp_flat_apt, file_url)
+                        df_flat_apt = tracking_flat_file_PM(df_temp_flat_apt, file_url)
                         if len(processed_data) != 0:
                             df_new_key_apt= pd.DataFrame()
-                            df_new_key_apt = check_new_key_MainSector(df_new_key = df_new_key_apt, processed_data = processed_data, sector = sector)
+                            df_new_key_apt = check_new_key_PM(df_new_key = df_new_key_apt, processed_data = processed_data, sector = sector)
                     
                     elif sector == 'VLTH':
                         df_temp_flat_vlth = pd.DataFrame()
                         df_temp_flat_vlth = pd.concat([df_temp_flat_vlth, data], axis=0)
-                        df_flat_vlth = tracking_flat_file_MainSector(df_temp_flat_vlth, file_url)
+                        df_flat_vlth = tracking_flat_file_PM(df_temp_flat_vlth, file_url)
                         if len(processed_data) != 0:
                             df_new_key_vlth= pd.DataFrame()
-                            df_new_key_vlth = check_new_key_MainSector(df_new_key = df_new_key_vlth, processed_data = processed_data, sector = sector) 
+                            df_new_key_vlth = check_new_key_PM(df_new_key = df_new_key_vlth, processed_data = processed_data, sector = sector) 
                     else:
                         pass
                     #Get key and generate new key (if needed)
-                    data = get_project_key_MainSector(flag_key, processed_data, data, sector, engine)
+                    data = get_project_key_PM(flag_key, processed_data, data, sector, engine)
                     print("Rows sau khi qua hàm get_project_key_MainSector: ",len(data))
                     data['File_Name'] = file_name.replace('.xlsx', '').replace('.csv', '')
                     try:
-                        result = insert_to_fresh_MainSector(file_url, data, cnt_str)
+                        result = insert_to_fresh_Product_Mix(file_url, data, cnt_str)
                         #data.to_excel('output.xlsx', index=False, engine='openpyxl')
+                        data.to_excel("data.xlsx", index=False, sheet_name="Sheet1")
                         print(colored("insert_to_fresh SUCESSFUL!",'green'))
                     except Exception as e:
                         print(colored("insert_to_fresh FAILED:",str(e),'red'))
@@ -817,13 +723,12 @@ def main():
     # set to_email
     selected_sectors = [] 
     while(True):
-        url_hub=f'/sites/BIHub/Shared Documents/Advisory Data/Main sector/Flat file/Province'
+        url_hub=f'/sites/BIHub/Shared Documents/Advisory Data/Product mix/Flat file'
         Hub= ConnectSharePoint(url_hub)
         sp_object = url_hub.split('/')[2].replace('-','')
         list_folder = Hub.get_content_url(url_hub, return_list_folder=True)
-        list_url, df_summ_file = getFileMainSector(list_folder, selected_sectors, url_hub)
+        list_url, df_summ_file = getFileProductMix(list_folder, selected_sectors, url_hub)
         selected_sectors.clear()
-        importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
-
+        importProduct_Mix(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub)
 if __name__ == "__main__":
     main() 

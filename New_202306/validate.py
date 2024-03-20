@@ -152,7 +152,7 @@ def remove_unicode(data):
 def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, cnxn, sp_object):
     lower_function = lambda x: x.strip().lower() if isinstance(x, str) else x
     if parameter in ['City', 'District', 'Status', 'Indicator'
-                     , 'Country', 'Industry', 'Developer'
+                     , 'Country', 'Industry'
                     ]:
         raw_parameter = pd.read_sql(f'select * from GENERAL.{parameter}_Dictionary',cnxn)
         raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
@@ -168,6 +168,8 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
         if sector in ['RETAIL', 'VLTH', 'APARTMENT'
                       , 'APT', 'IP', 'TENANT'
                      ]:
+            if sector == 'APT':
+                sector = 'APARTMENT'
             raw_parameter = pd.read_sql(f"select * from GENERAL.Project_{parameter}_Dictionary WHERE Sector = '{sector}' ",cnxn)
             raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
         else:
@@ -183,12 +185,23 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
             raw_parameter[f'Raw_{parameter}'] = remove_unicode(raw_parameter[f'Raw_{parameter}']).apply(lower_function)
             raw_parameter = raw_parameter.drop_duplicates(subset=[f'Raw_{parameter}'], keep='last')
         else:
-            return data, df_dict     
+            return data, df_dict
+    elif parameter in ['Developer']:
+        if sector in ['RETAIL', 'VLTH', 'APARTMENT'
+                      , 'APT', 'HOTEL', 'SA', 'SERVICED_APARTMENT', 'OFFICE']:
+            raw_parameter = pd.read_sql(f"select * from GENERAL.{parameter}_Dictionary WHERE Sector = 'Main Sector' ",cnxn)
+            raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
+        elif sector in ['IP']:
+            raw_parameter = pd.read_sql(f"select * from GENERAL.{parameter}_Dictionary WHERE Sector = 'Ip' ",cnxn)
+            raw_parameter[f'Raw_{parameter}'] = raw_parameter[f'Raw_{parameter}'].apply(lower_function)
+        else:
+            return data, df_dict
     else:
         print(colored('Unknown parameter in check dictionary section','yellow'))
         return data, df_dict 
     #print('Before: ',data['Grade'])
     data[f'{column_name}']= data[f'{column_name}'].apply(lower_function)
+
     # data[f'Convert_{parameter}'] = pd.merge(data, raw_parameter
     #                                         , how='left'
     #                                         , left_on=f'{column_name}'
@@ -202,19 +215,24 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
     print('parameter: ', parameter)
     if sector in ['IP']:
         data['Developer_Name']= data['Developer_Name'].fillna('No Information')
+    if sector in ['VLTH', 'APARTMENT', 'RETAIL']:
+        data['Developer']= data['Developer'].fillna('No Information')    
+    if sector in ['FDI']:
+        data['District']= data['District'].fillna('No Information')
     # if not data['Developer'].isnull().all():
     #     data['Developer'] = data['Developer'].fillna('No Information')
+
     if parameter == 'Grade' or parameter == 'Type' or parameter == 'Investment_Form':
         temp = data[[f'{column_name}',f'Convert_{parameter}']].dropna()
         parameter_not_in_dict = temp[f'{column_name}'][temp[f'Convert_{parameter}'].isnull()]      
     else:
         parameter_not_in_dict = data[f'{column_name}'][data[f'Convert_{parameter}'].isnull()]
+
     print(parameter_not_in_dict)
     if sector in ['HOTEL', 'OFFICE', 'APARTMENT'
                       , 'APT', 'SA', 'SERVICED_APARTMENT']:
         data['Grade']= data['Grade'].fillna('Unrated')
         data['Developer'] = data['Developer'].fillna('No Information')
-
     if len(parameter_not_in_dict) != 0:
         temp_df = pd.DataFrame()
         parameter_not_in_dict = list(set(parameter_not_in_dict))
@@ -231,6 +249,7 @@ def check_dictionary(df_dict, file_name, data, column_name, parameter, sector, c
         else:
             data[f'{column_name}'] = data[f'Convert_{parameter}']
             data = data.drop(columns = [f'Convert_{parameter}'])
+
         return data, df_dict
     
 

@@ -162,8 +162,8 @@ def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ
                     data[i] = remove_unicode(data[i])
                 #Check dictionary
                 print('Start Check dictionary...')
-                lst_dict = ['City', 'District', 'Status', 'Sub_Type', 'Type']
-                lst_cls = ['City', 'District', 'Status', 'Project_Sub_Type', 'Project_Type']
+                lst_dict = ['City', 'District', 'Status', 'Sub_Type', 'Type', 'Developer']
+                lst_cls = ['City', 'District', 'Status', 'Project_Sub_Type', 'Project_Type', 'Developer_Name']
                 for i, j in zip(lst_cls, lst_dict):
                     print(f'Start checking dictionary of [{i}:{j}]...')
                     data, df_dict = check_dictionary(df_dict, file_name, data, i, j, sector, engine, sp_object)
@@ -193,6 +193,7 @@ def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ
                     #insert_to_fresh(file_url, data, cnt_str)
                     Send_Email_IP(to_email, df_flat_ip, df_new_key_ip, cnt_str)
                     #Test insert_to_fresh
+                    data['File_Name'] = file_name.replace('.xlsx', '').replace('.csv', '')
                     try:
                         result = insert_to_fresh_IP(file_url, data, cnt_str)
                         print(colored("insert_to_fresh SUCESSFUL!",'green'))
@@ -205,6 +206,7 @@ def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ
                     df_noti_html = convert_df_to_html(type_html = 2, df = df_dict, type_sector = 2, cnxn = engine)
                     run_email(type_sector = 'IP', email_type = 2, user_email = to_email, df_noti_html = df_noti_html)
                     print(colored('Validate failed','red'))
+                    df_dict.to_excel("Missing_Dictionary.xlsx", index=False, sheet_name="Sheet1")
                     pass
 
 
@@ -212,7 +214,7 @@ def main():
     cnt_str = ConnectAzureSQLServer()
     engine = create_engine(cnt_str)
     # set to_email
-    to_email = ['hcmcbi-intern04@savills.com.vn']
+    to_email = ['pnguyenhaiduong@savills.com.vn']
     selected_provinces = [] 
     while(True):
         Sector= 'IP'

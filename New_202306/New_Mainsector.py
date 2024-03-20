@@ -685,8 +685,8 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                         pass   
                     data[i] = remove_unicode(data[i])
                 # Check dictionary
-                lst_dict = ['City', 'District', 'Status', 'Grade', 'Type', 'Developer']
-                lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status', 'Grade', 'Sub_Project_Type', 'Developer']
+                lst_dict = ['City', 'District', 'Status', 'Grade', 'Type']
+                lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status', 'Grade', 'Sub_Project_Type']
                 # lst_dict = ['City', 'District', 'Status']
                 # lst_cls = ['Project_City_Name', 'Project_District_Name', 'Project_Status']
                 #print('Before: \n',before_check)
@@ -754,7 +754,7 @@ def importMainSector(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_
                     print("Rows sau khi qua hàm get_project_key_MainSector: ",len(data))
                     
                     try:
-                        #result = insert_to_fresh_MainSector(file_url, data, cnt_str)
+                        result = insert_to_fresh_MainSector(file_url, data, cnt_str)
                         print(colored("insert_to_fresh SUCESSFUL!",'green'))
                     except Exception as e:
                         print(colored("insert_to_fresh FAILED:",str(e),'red'))
