@@ -116,7 +116,7 @@ def insert_to_fresh_MainSector(file_url, data, cnt_str):
     @event.listens_for(engine, 'before_cursor_execute')
     def receive_before_cursor_execute(conn, cursor, statement, params, context, executemany):
         file_name = file_url.split('/')[-1].split('.')[0]
-        print(f"Insert {sector} to Fresh.{sector}_New")
+        print(f"Insert {file_name} to Fresh.{sector}_New")
         if executemany:
             cursor.fast_executemany = True
     
@@ -236,7 +236,19 @@ def insert_to_fresh_MainSector(file_url, data, cnt_str):
                 pass
             data[i]=data[i].apply(convert_float).replace(r'\.0$','', regex=True)   
         data = data.replace({np.nan: None})
-
+        data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')
+    elif sector=='Product_Mix' or sector =='PM' or sector == 'ProductMix':
+        table_name='Product_Mix_New'
+        list_float_columns=['LA','GFA', 'Balcony_GFA', 'Pool_GFA','Garden_GFA',
+                            'Discount','Rent', 'Primary_Price_LA', 'Primary_Price_GFA', 'Secondary_Price_LA', 'Secondary_Price_GFA'
+                        ]
+        for i in list_float_columns:
+            if i not in data.columns:
+                data[i] = np.nan
+            else:
+                pass
+            data[i]=data[i].apply(convert_float).replace(r'\.0$','', regex=True) 
+        data = data.replace({np.nan: None})
         data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')
 
 def check_duplicate_MainSector(data, column_name):
@@ -494,6 +506,12 @@ def get_project_key_MainSector(flag_key, processed_data, data, sector, engine):
         list_column_name_insert_project=['Sector','Project_Name','Sub_Project_Name','Latitude','Longtitude','Project_Grade',
                                          'Project_Type', 'Current_Status','Project_Phase', 'Project_City_Name',
                                          'Project_District_Name','Developer','Date_Key','File_Date','Import_Date'
+                                        ]
+    elif sector in ['PM']:
+        list_keys=['Sector', 'Sub_Project_Name', 'Project_District_Name','Project_City_Name','Project_Grade','Project_Key']
+        list_keys_on=['Sector', 'Sub_Project_Name','Project_District_Name','Project_City_Name','Project_Grade']
+        list_column_name_insert_project=['Sector','Project_Name','Sub_Project_Name','Project_Grade',
+                                         'Project_City_Name','Project_District_Name','Date_Key','File_Date','Import_Date'
                                         ]
     elif sector in ['HOTEL','SA','SERVICED_APARTMENT']:
         list_keys=['Sector', 'Sub_Project_Name', 'Project_District_Name','Project_City_Name','Project_Grade','Project_Key']
