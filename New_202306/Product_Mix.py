@@ -112,9 +112,9 @@ def insert_to_fresh_Product_Mix(file_url, data, cnt_str):
     print('Sector: ', sector)
     if sector=='APARTMENT' or sector=='APT':
         table_name='Product_Mix_New'
-        list_float_columns = ['LA', 'GFA', 'Balcony_GFA', 'Pool_GFA', 'Garden_GFA', 
-                             'Discount', 'Incentive', 'Rent', 'Primary_Price_LA', 'Primary_Price_GFA', 
-                              'Secondary_Price_LA', 'Secondary_Price_GFA'
+        list_float_columns = ['NSA', 'GFA', 'Balcony_GFA', 'Pool_GFA', 'Garden_GFA', 
+                             'Discount', 'Incentive', 'Rent', 'Primary_Price_NSA', 'Primary_Price_GFA', 
+                              'Secondary_Price_NSA', 'Secondary_Price_GFA'
                              ]     
         for i in list_float_columns:
             if i not in data.columns:
@@ -139,7 +139,7 @@ def insert_to_fresh_Product_Mix(file_url, data, cnt_str):
         data = data.replace({np.nan: None})
         data.to_sql(table_name, engine, index=False, if_exists='append', schema='Fresh')
 
-def check_duplicate_MainSector(data, column_name):
+def check_duplicate_PM(data, column_name):
     unique_values = data['Date_Key'].astype(str) + data['Project_City_Name'].astype(str) + data['Project_District_Name'].astype(str)
     unique_values = unique_values.unique()
     duplicate_dfs = []
@@ -465,10 +465,7 @@ def get_project_key_PM(flag_key, processed_data, data, sector, engine):
                        ]:
             data.rename(columns = {'Project_Key_y':'Project_Key','Project_Grade':'Grade'}, inplace = True)
             data['Sector']=data['Sector'].str.upper()
-        elif sector in ['Product_Mix', 'PM']:
-            data.rename(columns = {'Project_Key_y':'Project_Key'}, inplace = True)
-            data['Sector']=data['Sector'].str.upper()
-            data['File_Date'] = pd.to_datetime(data['File_Date']).dt.date
+         
         else:
             data.rename(columns = {'Project_Key_y':'Project_Key'}, inplace = True)
             data['File_Date'] = pd.to_datetime(data['File_Date']).dt.date
@@ -611,7 +608,6 @@ def check_dictionary_PM(df_dict, file_name, data, column_name, parameter, sector
         else:
             data[f'{column_name}'] = data[f'Convert_{parameter}']
             data = data.drop(columns = [f'Convert_{parameter}'])
-
         return data, df_dict
 def importProduct_Mix(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ_file, Hub):
         '''Prepare ingredients''' 
@@ -636,7 +632,7 @@ def importProduct_Mix(list_folder, url_hub, list_url ,cnt_str, sp_object,df_summ
             #data = check_date_key(file_url, data) #Check format date_key in flat file   
             data['Project_Name']= np.where(data['Project_Name'].isnull(), data['Sub_Project_Name'], data['Project_Name']) #Fill up project_name if its null
             #Check duplicate sub_name
-            data, df_dup = check_duplicate_MainSector(data, 'Sub_Project_Name')
+            data, df_dup = check_duplicate_PM(data, 'Product_Code')
             print("Rows sau khi check duplicate: ",len(data))
             print("Số lượng rows bị duplicate: ",len(df_dup))
             if len(df_dup) != 0:
