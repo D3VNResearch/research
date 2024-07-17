@@ -38,7 +38,7 @@ python run_pipeline.py
 ## Data Flow
 The data pipeline follows these steps:
 
-1. **Extract**: Data is extracted from the specified source (e.g., CSV files, APIs, databases).
+1. **Extract**: Data is extracted from the specified source (e.g., CSV files, XLSX files, databases).
 2. **Transform**: Data undergoes several transformations such as cleaning, normalization, and validation.
 3. **Load**: Transformed data is loaded into the destination database.
 
