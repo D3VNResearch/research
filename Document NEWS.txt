@@ -1,0 +1,9 @@
+- Chạy file code Crawl_New.py
+- Sau đó data sẽ được đổ vào file EXCEL Data_News.xlsx
+- Copy data mới nhất vào 'https://savills.sharepoint.com/:x:/s/BIHub/Ed9CXKr_nVFGrUGKqGTT3dsBvoviFXqQQ4Jt2B7nWXtdRA?e=znbuOo'
+- Sau đó chạy code Import_New.ipynb
+- Refresh dataflow và dataset
+- Check data in https://app.powerbi.com/links/Pmr3RWgv48?ctid=d929b288-ebb1-49e2-8435-99994c5663d6&pbi_source=linkShare&bookmarkGuid=1265f60d-f16b-4567-bc8e-a38b79b515d6
+
+## Note: 
+Có thể chỉnh sửa source code lại để import thẳng từ file EXCEL Data_News.xlsx vào database nếu không cần backup lên drive
