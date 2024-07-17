@@ -146,6 +146,7 @@ def importIP(list_folder, url_hub, list_url, to_email,cnt_str, sp_object,df_summ
             data, df_dup = check_duplicate_IP(data, 'Sub_Project_Name')
             if len(df_dup) != 0:
                 print(colored('Check duplicate sub_name', 'yellow'))
+                print(df_dup['Sub_Project_Name'])
                 df_noti_html = convert_df_to_html(type_html = 1, df = df_dup, type_sector = 2, cnxn = engine)
                 run_email(type_sector = 'IP', email_type = 1, user_email = to_email, df_noti_html = df_noti_html)
             else:
